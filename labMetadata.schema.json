@@ -1,0 +1,62 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Lab Metadata",
+    "type": "object",
+    "properties": {
+      "contentOwner": {
+        "type": "array",
+        "description": "A list of lab content owner Microsoft aliases"
+      },
+      "labType": {
+        "type": "string",
+        "description": "The type of lab",
+        "enum": ["individual", "shared", "individualAndShared", "corporate"]
+      },
+      "maximumParticipants": {
+        "type": "integer",
+        "description": "Maximum number of participants (based on content, structure, limitations, etc)"
+      },
+      "groupSize": {
+        "type": "integer",
+        "description": "If using groups, define the size of each group"
+      },
+      "deliveryFormat": {
+        "type": "string",
+        "description": "The format of the delivery",
+        "enum": ["self-paced", "instructor-led"]
+      },
+      "requiredRetention": {
+        "type": "integer",
+        "description": "Expected retention for lab resources in days"
+      },
+      "requiredRegion": {
+        "type": "string",
+        "description": "If a specific Azure region is required, specify by name"
+      },
+      "requiredQuota": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "A list of required resource quotas. Find the quota name with Get-AzQuota. The lab will check before deployment that the student lab has available quota. For example: ['standardEav6Family',2]"
+      },
+      "identityType": {
+        "type": "string",
+        "description": "The identity required for the lab students",
+        "enum": ["lab", "Microsoft", "personal"]
+      },
+      "deploymentPermissions": {
+        "type": "string",
+        "description": "Permissions required to deploy the lab if other than contributor at the resource group scope"
+      },
+      "deploymentProcedure": {
+        "type": "string",
+        "description": "Detailed steps to deploy the lab"
+      },
+      "cleanupProcedure": {
+        "type": "string",
+        "description": "Detailed steps to clean up the lab"
+      }
+    },
+    "required": ["contentOwner", "labType", "maximumParticipants", "deliveryFormat", "requiredRetention", "requiredRegion", "requiredQuota", "identityType", "deploymentPermissions", "deploymentProcedure", "cleanupProcedure"]
+  }

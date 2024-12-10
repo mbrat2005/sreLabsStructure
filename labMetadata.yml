@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=./labMetadata.schema.json
+
+contentOwner: 
+  - 'mbratschun'
+labType: individual
+maximumParticipants: 0
+deliveryFormat:  instructor-led
+requiredRetention: 0
+requiredRegion: 
+requiredQuota:
+  - 
+identityType: 
+deploymentPermissions: 
+deploymentProcedure: 
+cleanupProcedure: 
