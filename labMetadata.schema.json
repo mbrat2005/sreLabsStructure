@@ -1,62 +1,258 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "Lab Metadata",
-    "type": "object",
-    "properties": {
-      "contentOwner": {
-        "type": "array",
-        "description": "A list of lab content owner Microsoft aliases"
-      },
-      "labType": {
-        "type": "string",
-        "description": "The type of lab",
-        "enum": ["individual", "shared", "individualAndShared", "corporate"]
-      },
-      "maximumParticipants": {
-        "type": "integer",
-        "description": "Maximum number of participants (based on content, structure, limitations, etc)"
-      },
-      "groupSize": {
-        "type": "integer",
-        "description": "If using groups, define the size of each group"
-      },
-      "deliveryFormat": {
-        "type": "string",
-        "description": "The format of the delivery",
-        "enum": ["self-paced", "instructor-led"]
-      },
-      "requiredRetention": {
-        "type": "integer",
-        "description": "Expected retention for lab resources in days"
-      },
-      "requiredRegion": {
-        "type": "string",
-        "description": "If a specific Azure region is required, specify by name"
-      },
-      "requiredQuota": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        },
-        "description": "A list of required resource quotas. Find the quota name with Get-AzQuota. The lab will check before deployment that the student lab has available quota. For example: ['standardEav6Family',2]"
-      },
-      "identityType": {
-        "type": "string",
-        "description": "The identity required for the lab students",
-        "enum": ["lab", "Microsoft", "personal"]
-      },
-      "deploymentPermissions": {
-        "type": "string",
-        "description": "Permissions required to deploy the lab if other than contributor at the resource group scope"
-      },
-      "deploymentProcedure": {
-        "type": "string",
-        "description": "Detailed steps to deploy the lab"
-      },
-      "cleanupProcedure": {
-        "type": "string",
-        "description": "Detailed steps to clean up the lab"
-      }
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Lab Metadata",
+  "type": "object",
+  "properties": {
+    "contentOwners": {
+      "type": "array",
+      "description": "A list of lab content owner Microsoft aliases"
     },
-    "required": ["contentOwner", "labType", "maximumParticipants", "deliveryFormat", "requiredRetention", "requiredRegion", "requiredQuota", "identityType", "deploymentPermissions", "deploymentProcedure", "cleanupProcedure"]
-  }
+    "labType": {
+      "type": "string",
+      "description": "The type of lab",
+      "enum": [
+        "individual",
+        "shared",
+        "individualAndShared",
+        "corporate"
+      ]
+    },
+    "maximumParticipants": {
+      "type": "integer",
+      "description": "Maximum number of participants (based on content, structure, limitations, etc)"
+    },
+    "groupSize": {
+      "type": "integer",
+      "description": "If using groups, define the size of each group"
+    },
+    "deliveryFormat": {
+      "type": "string",
+      "description": "The format of the delivery",
+      "enum": [
+        "self-paced",
+        "instructor-led"
+      ]
+    },
+    "requiredRetention": {
+      "type": "integer",
+      "description": "Expected retention for lab resources in days"
+    },
+    "requiredRegion": {
+      "type": "string",
+      "description": "If a specific Azure region is required, specify by name",
+      "enum": [
+        "asia",
+        "asiapacific",
+        "australia",
+        "australiacentral",
+        "australiacentral2",
+        "australiaeast",
+        "australiasoutheast",
+        "brazil",
+        "brazilsouth",
+        "brazilsoutheast",
+        "canada",
+        "canadacentral",
+        "canadaeast",
+        "centralindia",
+        "centralus",
+        "centraluseuap",
+        "eastasia",
+        "eastus",
+        "eastus2",
+        "eastus2euap",
+        "europe",
+        "france",
+        "francecentral",
+        "francesouth",
+        "germany",
+        "germanynorth",
+        "germanywestcentral",
+        "global",
+        "india",
+        "israel",
+        "israelcentral",
+        "italy",
+        "italynorth",
+        "japan",
+        "japaneast",
+        "japanwest",
+        "korea",
+        "koreacentral",
+        "koreasouth",
+        "mexicocentral",
+        "newzealand",
+        "newzealandnorth",
+        "northcentralus",
+        "northeurope",
+        "norway",
+        "norwayeast",
+        "norwaywest",
+        "poland",
+        "polandcentral",
+        "qatar",
+        "qatarcentral",
+        "singapore",
+        "southafrica",
+        "southafricanorth",
+        "southafricawest",
+        "southcentralus",
+        "southeastasia",
+        "southindia",
+        "spaincentral",
+        "sweden",
+        "swedencentral",
+        "switzerland",
+        "switzerlandnorth",
+        "switzerlandwest",
+        "uaecentral",
+        "uaenorth",
+        "uksouth",
+        "ukwest",
+        "unitedstates",
+        "westcentralus",
+        "westeurope",
+        "westindia",
+        "westus",
+        "westus2",
+        "westus3"
+      ]
+    },
+    "validRegions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "asia",
+          "asiapacific",
+          "australia",
+          "australiacentral",
+          "australiacentral2",
+          "australiaeast",
+          "australiasoutheast",
+          "brazil",
+          "brazilsouth",
+          "brazilsoutheast",
+          "canada",
+          "canadacentral",
+          "canadaeast",
+          "centralindia",
+          "centralus",
+          "centraluseuap",
+          "eastasia",
+          "eastus",
+          "eastus2",
+          "eastus2euap",
+          "europe",
+          "france",
+          "francecentral",
+          "francesouth",
+          "germany",
+          "germanynorth",
+          "germanywestcentral",
+          "global",
+          "india",
+          "israel",
+          "israelcentral",
+          "italy",
+          "italynorth",
+          "japan",
+          "japaneast",
+          "japanwest",
+          "korea",
+          "koreacentral",
+          "koreasouth",
+          "mexicocentral",
+          "newzealand",
+          "newzealandnorth",
+          "northcentralus",
+          "northeurope",
+          "norway",
+          "norwayeast",
+          "norwaywest",
+          "poland",
+          "polandcentral",
+          "qatar",
+          "qatarcentral",
+          "singapore",
+          "southafrica",
+          "southafricanorth",
+          "southafricawest",
+          "southcentralus",
+          "southeastasia",
+          "southindia",
+          "spaincentral",
+          "sweden",
+          "swedencentral",
+          "switzerland",
+          "switzerlandnorth",
+          "switzerlandwest",
+          "uaecentral",
+          "uaenorth",
+          "uksouth",
+          "ukwest",
+          "unitedstates",
+          "westcentralus",
+          "westeurope",
+          "westindia",
+          "westus",
+          "westus2",
+          "westus3"
+        ]
+      },
+      "description": "A list of valid Azure regions for the lab. If the lab can be deployed in any region, use []",
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "requiredQuotas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "quotaName": {
+            "type": "string",
+            "description": "The name of the quota"
+          },
+          "quotaAmount": {
+            "type": "integer",
+            "description": "The amount of the quota required"
+          }
+        }
+      },
+      "description": "A list of required resource quotas. Find the quota name with Get-AzQuota. The lab will check before deployment that the student lab has available quota. For example: ['standardEav6Family',2]"
+    },
+    "identityType": {
+      "type": "string",
+      "description": "The identity required for the lab students",
+      "enum": [
+        "lab",
+        "Microsoft",
+        "personal"
+      ]
+    },
+    "deploymentPermissions": {
+      "type": "string",
+      "description": "Permissions required to deploy the lab if other than contributor at the resource group scope"
+    },
+    "deploymentProcedure": {
+      "type": "string",
+      "description": "Detailed steps to deploy the lab"
+    },
+    "cleanupProcedure": {
+      "type": "string",
+      "description": "Detailed steps to clean up the lab"
+    }
+  },
+  "required": [
+    "contentOwners",
+    "labType",
+    "maximumParticipants",
+    "deliveryFormat",
+    "requiredRetention",
+    "requiredQuotas",
+    "identityType",
+    "deploymentPermissions",
+    "deploymentProcedure",
+    "cleanupProcedure"
+  ]
+}

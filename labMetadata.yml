@@ -1,15 +1,19 @@
 # yaml-language-server: $schema=./labMetadata.schema.json
 
-contentOwner: 
+contentOwners: 
   - 'mbratschun'
 labType: individual
 maximumParticipants: 0
 deliveryFormat:  instructor-led
 requiredRetention: 0
-requiredRegion: 
-requiredQuota:
-  - 
-identityType: 
-deploymentPermissions: 
-deploymentProcedure: 
-cleanupProcedure: 
+requiredRegion: eastus
+validRegions:
+  - eastus2
+  - southeastasia
+requiredQuotas:
+  - quotaName: standardEav6Family
+    quotaAmount: 2
+identityType: lab
+deploymentPermissions: na
+deploymentProcedure: 'asdf'
+cleanupProcedure: 'asd'
