@@ -73,7 +73,7 @@ jobs:
             Write-Error "The target scope at the top of main.bicep for lab $($lab.Name) is not `"targetScope = 'subscription'`""
           }
         }
-      displayName: 'Validate main.bicep builds'    
+      displayName: 'Validate main.bicep target scope is subscription'    
 
     - task: ps-rule-assert@2
       displayName: Analyze Azure template files
