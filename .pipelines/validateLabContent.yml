@@ -96,18 +96,4 @@ jobs:
             az resource delete --ids $resource.id
           }
         }
-      displayName: 'Test deployment of main.bicep'
-
-    - pwsh: |
-        $labs = Get-ChildItem -Directory -Path labs
-        foreach ($lab in $labs) {
-          Write-Output "Cleaning up resources for $($lab.FullName)"
-          $deployment = az deployment group create --resource-group MyResourceGroup --template-file "$($lab.FullName)/labResources/main.bicep" --parameters @$($lab.FullName)/labResources/test.bicepparams --query id -o tsv
-          $resources = az deployment group show --name $deployment --resource-group MyResourceGroup --query properties.outputs.resources.value -o json | ConvertFrom-Json
-          
-          foreach ($resource in $resources) {
-            Write-Output "Deleting resource: $($resource.id)"
-            az resource delete --ids $resource.id
-          }
-        }
-      displayName: 'Clean up deployed resources'
+      displayName: 'Test deployment of main.bicep, then clean up'
