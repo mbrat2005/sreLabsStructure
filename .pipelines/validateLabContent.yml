@@ -13,7 +13,7 @@ jobs:
   displayName: Validate and Deploy Labs
   pool:
     vmImage: 'ubuntu-latest'
-  steps:
+  steps:     
 
     - pwsh: |
         $labs = Get-ChildItem -Directory -Path labs
@@ -59,13 +59,11 @@ jobs:
         }
       displayName: 'Validate main.bicep builds'
 
-    - pwsh: |
-        $labs = Get-ChildItem -Directory -Path labs
-        foreach ($lab in $labs) {
-          Write-Output "Running PSRules.Azure validation for $($lab.FullName)"
-          psrule -Module PSRule.Rules.Azure -InputPath "$($lab.FullName)/labResources/main.bicep"
-        }
-      displayName: 'Run PSRules.Azure validation'
+    - task: ps-rule-assert@2
+      displayName: Analyze Azure template files
+      inputs:
+        inputType: repository
+        modules: 'PSRule.Rules.Azure'   
 
     - pwsh: |
         $labs = Get-ChildItem -Directory -Path labs
