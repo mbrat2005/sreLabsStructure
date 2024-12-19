@@ -33,7 +33,7 @@ jobs:
         foreach ($lab in $labs) {
           Write-Output "Checking required files for $($lab.FullName)"
           $requiredFiles = @("labMetadata.yml", "studentGuide.md", "main.bicep")
-          $labFiles = Get-ChildItem -Path "$($lab.FullName)" -Recurse -File | Select-Expand -property Name
+          $labFiles = Get-ChildItem -Path "$($lab.FullName)" -Recurse -File | Select-Object -Expand Name
           foreach ($file in $requiredFiles) {
             if ($file -in $requiredFiles) {
               Write-Output "$file exists in $($lab.FullName) at $($file.FullName)"
