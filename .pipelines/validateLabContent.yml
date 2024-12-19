@@ -59,6 +59,22 @@ jobs:
         }
       displayName: 'Validate main.bicep builds'
 
+    - pwsh: |
+        $labs = Get-ChildItem -Directory -Path labs
+        foreach ($lab in $labs) {
+          Write-Output "Processing $($lab.FullName)"
+
+          $firstLine = Get-Content -Path "$($lab.FullName)/labResources/main.bicep" | Select-Object -First 1
+          
+          if ($firstLine -match "targetScope ?= ?'subscription'") {
+            Write-Output "Bicep target scope is subscription."
+          }
+          Else {
+            Write-Error "The target scope at the top of main.bicep for lab $($lab.Name) is not `"targetScope = 'subscription'`""
+          }
+        }
+      displayName: 'Validate main.bicep builds'    
+
     - task: ps-rule-assert@2
       displayName: Analyze Azure template files
       inputs:
