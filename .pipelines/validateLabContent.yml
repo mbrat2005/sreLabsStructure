@@ -1,0 +1,101 @@
+trigger:
+  branches:
+    exclude:
+      - "*"
+
+pr:
+  paths:
+    include:
+      - /labs/*
+
+jobs:
+- job: ValidateAndDeployLabs
+  displayName: Validate and Deploy Labs
+  pool:
+    vmImage: 'ubuntu-latest'
+  steps:
+    - task: UseBicepCli@0
+      inputs:
+        version: 'latest'
+
+    - pwsh: |
+        $labs = Get-ChildItem -Directory -Path labs
+        foreach ($lab in $labs) {
+          Write-Output "Processing $($lab.FullName)"
+          if (Test-Path "$($lab.FullName)/main.bicep") {
+            Write-Output "Validating main.bicep for $($lab.FullName)"
+            bicep build "$($lab.FullName)/main.bicep"
+          } else {
+            Write-Error "main.bicep not found in $($lab.FullName)"
+            exit 1
+          }
+        }
+      displayName: 'Validate main.bicep builds'
+
+    - pwsh: |
+        $labs = Get-ChildItem -Directory -Path labs
+        foreach ($lab in $labs) {
+          Write-Output "Checking labResources directory for $($lab.FullName)"
+          if (Test-Path "$($lab.FullName)/labResources") {
+            Write-Output "labResources directory exists for $($lab.FullName)"
+          } else {
+            Write-Error "labResources directory does not exist for $($lab.FullName)"
+            exit 1
+          }
+        }
+      displayName: 'Check for labResources directory'
+
+    - pwsh: |
+        $labs = Get-ChildItem -Directory -Path labs
+        foreach ($lab in $labs) {
+          Write-Output "Checking required files for $($lab.FullName)"
+          $requiredFiles = @("labMetadata.yml", "studentGuide.md", "main.bicep")
+          foreach ($file in $requiredFiles) {
+            if (Test-Path "$($lab.FullName)/$file") {
+              Write-Output "$file exists in $($lab.FullName)"
+            } else {
+              Write-Error "$file does not exist in $($lab.FullName)"
+              exit 1
+            }
+          }
+        }
+      displayName: 'Check for required files'
+
+    - pwsh: |
+        $labs = Get-ChildItem -Directory -Path labs
+        foreach ($lab in $labs) {
+          Write-Output "Running PSRules.Azure validation for $($lab.FullName)"
+          psrule -Module PSRule.Rules.Azure -InputPath "$($lab.FullName)/main.bicep"
+        }
+      displayName: 'Run PSRules.Azure validation'
+
+    - pwsh: |
+        $labs = Get-ChildItem -Directory -Path labs
+        foreach ($lab in $labs) {
+          Write-Output "Testing deployment for $($lab.FullName)"
+          $deployment = az deployment group create --resource-group MyResourceGroup --template-file "$($lab.FullName)/main.bicep" --parameters @test.bicepparams --query id -o tsv
+          Write-Output "Deployment ID: $deployment"
+
+          # Fetch the resources from the deployment
+          $resources = az deployment group show --name $deployment --resource-group MyResourceGroup --query properties.outputs.resources.value -o json | ConvertFrom-Json
+
+          foreach ($resource in $resources) {
+            Write-Output "Deleting resource: $($resource.id)"
+            az resource delete --ids $resource.id
+          }
+        }
+      displayName: 'Test deployment of main.bicep'
+
+    - pwsh: |
+        $labs = Get-ChildItem -Directory -Path labs
+        foreach ($lab in $labs) {
+          Write-Output "Cleaning up resources for $($lab.FullName)"
+          $deployment = az deployment group create --resource-group MyResourceGroup --template-file "$($lab.FullName)/main.bicep" --parameters @test.bicepparams --query id -o tsv
+          $resources = az deployment group show --name $deployment --resource-group MyResourceGroup --query properties.outputs.resources.value -o json | ConvertFrom-Json
+          
+          foreach ($resource in $resources) {
+            Write-Output "Deleting resource: $($resource.id)"
+            az resource delete --ids $resource.id
+          }
+        }
+      displayName: 'Clean up deployed resources'
