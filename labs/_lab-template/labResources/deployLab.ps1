@@ -8,29 +8,34 @@ param (
 Function Test-LabPrerequisites {
     [CmdletBinding()]
     param (
-        [Parameter()]
+        [Parameter(Mandatory=$true)]
         [string]
         $labMetadataPath,
 
-        [Parameter()]
+        [Parameter(Mandatory=$true)]
         [string]
         $labResourcesPath,
 
-        [Parameter()]
+        [Parameter(Mandatory=$false)]
         [string]
         $deploymentLocation
     )
 
     # check for lab metadata file
     if (-not (Test-Path $labMetadataPath)) {
-        throw "Lab metadata file not found at $labMetadataPath"
+        throw "Lab metadata file not found at '$labMetadataPath'"
     }
 
     $labMetadata = Get-Content $labMetadataPath | ConvertFrom-Json
 
+    # set deployment location if none was provided
+    If (-not $deploymentLocation) {
+        $deploymentLocation = $labMetadata.validRegions[0]
+    }
+
     # check that deployment location is in lab metadata
     If (-not ($labMetadata.validRegions -contains $deploymentLocation)) {
-        throw "Deployment location '$deploymentLocation' not found in lab metadata. Valid locations are $($labMetadata.locations -join ', ')"
+        throw "Deployment location '$deploymentLocation' not found in lab metadata. Valid locations are $($labMetadata.validRegions -join ', ')"
     }
 
     # check for lab resources file
@@ -44,7 +49,7 @@ Function Test-LabPrerequisites {
     }
 
     # check for Azure PowerShell Module
-    If (-not (Get-Module -Name Az -ListAvailable)) {
+    If (-not (Get-Module -Name Az.* -ListAvailable)) {
         throw "Azure PowerShell Module not found. Please install Azure PowerShell Module"
     }
 
@@ -68,20 +73,20 @@ Function Test-LabPrerequisites {
 
     # check that quotas are available in required regions
     ForEach ($requiredQuota in $labMetadata.requiredQuotas) {
-        $scopeString = "/subscriptions/{0}/providers/{1}/locations/{2}/{3}" -f $azContext.Subscription.Id, $requiredQuota.resourceProvider, $requiredQuota.location,$requiredQuota.quotaName
+        $scopeString = "/subscriptions/{0}/providers/{1}/locations/{2}" -f $azContext.Subscription.Id, $requiredQuota.quotaResourceProvider, $deploymentLocation
         
         Write-Verbose "Checking quota for '$scopeString'"
-        $quota = Get-AzQuota -Scope $scopeString
-        $usage = Get-AzQuotaUsage -Scope $scopeString
+        $quota = Get-AzQuota -Scope $scopeString -ResourceName $requiredQuota.quotaName
+        $usage = Get-AzQuotaUsage -Scope $scopeString -Name $requiredQuota.quotaName
 
-        Write-Verbose "Calculating available quota by subtracting usage ('$($usage.UsageValue)') from limit ('$($quota.Limit)')"
-        $availableQuota = $quota.Limit - $usage.UsageValue
+        Write-Verbose "Calculating available quota by subtracting usage ('$($usage.UsageValue)') from limit ('$($quota.Limit.Value)')"
+        $availableQuota = $quota.Limit.Value - $usage.UsageValue
 
         If ($requiredQuota.quotaAmount -ge $availableQuota) {
-            throw "Quota for '$($requiredQuota.quotaName)' in $($requiredQuota.location) is at limit. Required '$($requiredQuota.quotaAmount)', Available: '$availableQuota'. Either use another region or subscription for you deployment which as sufficient quota."
+            throw "Quota for '$($requiredQuota.quotaName)' in $($deploymentLocation) is at limit. Required '$($requiredQuota.quotaAmount)', Available: '$availableQuota'. Either use another region or subscription for you deployment which as sufficient quota."
         }
         Else {
-            Write-Verbose "Sufficient quota for '$($requiredQuota.quotaName)' in $requiredQuota.location. Required: '$($requiredQuota.quotaAmount)', Available: '$availableQuota'"
+            Write-Verbose "Sufficient quota for '$($requiredQuota.quotaName)' in '$deploymentLocation'. Required: '$($requiredQuota.quotaAmount)', Available: '$availableQuota'"
         }
     }
 
