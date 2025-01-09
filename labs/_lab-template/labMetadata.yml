@@ -14,6 +14,8 @@ requiredQuotas:
   - quotaName: standardEav6Family
     quotaAmount: 2
 identityType: lab
-deploymentPermissions: na
+deploymentPermissions:
+  - permissionScope: resourceGroup
+    builtInRoleName: Owner
 deploymentProcedure: 'asdf'
 cleanupProcedure: 'asd'

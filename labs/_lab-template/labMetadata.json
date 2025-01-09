@@ -1,26 +1,31 @@
 {
-    "$schema": "../../labMetadata.schema.json",
-    "cleanupProcedure": "asd",
-    "contentOwners": [
-      "mbratschun"
-    ],
-    "maximumParticipants": 0,
-    "requiredRetention": 0,
-    "requiredQuotas": [
-      {
-        "quotaName": "standardEav6Family",
-        "quotaAmount": 2
-      }
-    ],
-    "deploymentProcedure": "asdf",
-    "labType": "individual",
-    "requiredRegion": "eastus",
-    "identityType": "lab",
-    "deliveryFormat": "instructor-led",
-    "deploymentPermissions": "na",
-    "validRegions": [
-      "eastus2",
-      "southeastasia"
-    ]
-  }
-  
+  "$schema": "../../labMetadata.schema.json",
+  "cleanupProcedure": "asd",
+  "contentOwners": [
+    "mbratschun"
+  ],
+  "maximumParticipants": 0,
+  "requiredRetention": 0,
+  "requiredQuotas": [
+    {
+      "quotaName": "standardEav6Family",
+      "quotaAmount": 2,
+      "quotaResourceProvider": "Microsoft.Compute"
+    }
+  ],
+  "deploymentProcedure": "asdf",
+  "labType": "individual",
+  "requiredRegion": "eastus",
+  "identityType": "lab",
+  "deliveryFormat": "instructor-led",
+  "deploymentPermissions": [
+    {
+      "permissionScope": "resourceGroup",
+      "builtInRoleName": "Contributor"
+    }
+  ],
+  "validRegions": [
+    "eastus2",
+    "southeastasia"
+  ]
+}

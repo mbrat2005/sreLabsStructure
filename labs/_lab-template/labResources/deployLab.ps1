@@ -66,15 +66,26 @@ Function Test-LabPrerequisites {
         Install-Module Az.Quota -Scope CurrentUser
     }
 
-    # TODO check that quotas are available in required regions
-    # ForEach ($requiredQuota in $labMetadata.requiredQuotas) {
-    #     $quota = Get-AzVMUsage -Location $requiredQuota.location | Where-Object {$_.Name -eq $requiredQuota.resourceType}
-    #     If ($requiredQuota.quotaAmount -ge $quota.Limit) {
-    #         throw "Quota for '$($requiredQuota.quotaName)' in $requiredQuota.location is at limit. Please request a quota increase."
-    #     }
-    # }
+    # check that quotas are available in required regions
+    ForEach ($requiredQuota in $labMetadata.requiredQuotas) {
+        $scopeString = "/subscriptions/{0}/providers/{1}/locations/{2}/{3}" -f $azContext.Subscription.Id, $requiredQuota.resourceProvider, $requiredQuota.location,$requiredQuota.quotaName
+        
+        Write-Verbose "Checking quota for '$scopeString'"
+        $quota = Get-AzQuota -Scope $scopeString
+        $usage = Get-AzQuotaUsage -Scope $scopeString
 
-    # TODO check that required permissions for lab resources are available
+        Write-Verbose "Calculating available quota by subtracting usage ('$($usage.UsageValue)') from limit ('$($quota.Limit)')"
+        $availableQuota = $quota.Limit - $usage.UsageValue
+
+        If ($requiredQuota.quotaAmount -ge $availableQuota) {
+            throw "Quota for '$($requiredQuota.quotaName)' in $($requiredQuota.location) is at limit. Required '$($requiredQuota.quotaAmount)', Available: '$availableQuota'. Either use another region or subscription for you deployment which as sufficient quota."
+        }
+        Else {
+            Write-Verbose "Sufficient quota for '$($requiredQuota.quotaName)' in $requiredQuota.location. Required: '$($requiredQuota.quotaAmount)', Available: '$availableQuota'"
+        }
+    }
+
+    # check that required permissions for lab resources are available
     # $labMetadata.deploymentPermissions
 
     Write-Host "All prerequisites met"
