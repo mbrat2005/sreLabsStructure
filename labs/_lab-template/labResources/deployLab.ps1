@@ -2,7 +2,11 @@
 param (
     [Parameter()]
     [string]
-    $deploymentLocation
+    $deploymentLocation,
+
+    [Parameter()]
+    [string]
+    $labInstancePrefix = ('adhoc-sre-lab_{0}' -f (Get-Date -Format 'yyyyMMddHHmmss'))
 )
 
 Function Test-LabPrerequisites {
@@ -26,6 +30,7 @@ Function Test-LabPrerequisites {
         throw "Lab metadata file not found at '$labMetadataPath'"
     }
 
+    # convert lab metadata file from JSON to PowerShell object
     $labMetadata = Get-Content $labMetadataPath | ConvertFrom-Json
 
     # set deployment location if none was provided
@@ -97,12 +102,37 @@ Function Test-LabPrerequisites {
 }
 
 Function Start-LabDeployment {
-    # TODO
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory=$true)]
+        [string]
+        $labMetadataPath,
+
+        [Parameter(Mandatory=$true)]
+        [string]
+        $labResourcesPath,
+
+        [Parameter(Mandatory=$false)]
+        [string]
+        $deploymentLocation,
+
+        [Parameter(Mandatory=$true)]
+        [string]
+        $labInstancePrefix
+    )
+
+    $labMetadata = Get-Content $labMetadataPath | ConvertFrom-Json
+
+    New-AzSubscriptionDeploymentStack -Name $labInstancePrefix -Location $deploymentLocation -TemplateFile $labResourcesPath -ActionOnUnmanage DeleteAll -DenySettingsMode None -TemplateParameterObject @{
+        location = $deploymentLocation
+    }
 }
 
 $labMetadataPath = './labMetadata.json'
 $labResourcesPath = './labResources/main.bicep'
 
-Test-LabPrerequisites -labMetadataPath $labMetadataPath -labResourcesPath $labResourcesPath -deploymentLocation $deploymentLocation
+$hardCodedLocation = 'eastus2'
 
-Start-LabDeployment
+Test-LabPrerequisites -labMetadataPath $labMetadataPath -labResourcesPath $labResourcesPath -deploymentLocation $hardCodedLocation
+
+Start-LabDeployment -labMetadataPath $labMetadataPath -labResourcesPath $labResourcesPath -deploymentLocation $hardCodedLocation -labInstancePrefix $labInstancePrefix 
