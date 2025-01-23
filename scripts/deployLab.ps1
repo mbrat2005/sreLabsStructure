@@ -6,7 +6,11 @@ param (
 
     [Parameter()]
     [string]
-    $labInstancePrefix = ('adhoc-sre-lab_{0}' -f (Get-Date -Format 'yyyyMMddHHmmss'))
+    $labInstancePrefix = ('adhoc-sre-lab_{0}' -f (Get-Date -Format 'yyyyMMddHHmmss')),
+
+    [Parameter()]
+    [switch]
+    $whatIf
 )
 
 Function Test-LabPrerequisites {
@@ -35,8 +39,17 @@ Function Test-LabPrerequisites {
 
     # set deployment location if none was provided
     If (-not $deploymentLocation) {
-        $deploymentLocation = $labMetadata.validRegions[0]
+        If ($labMetadata.validRegions.count -ge 1) {
+            $deploymentLocation = $labMetadata.validRegions | Get-Random
+        }
+        Else {
+            Write-Verbose "Selecting random region for deployment, since -deploymentLocation was not specified and no valid regions were listed in lab metadata"
+            $deploymentLocation = (get-azlocation).location | Get-Random
+        }
     }
+
+    # set deployment location in global scope
+    $script:deploymentLocation = $deploymentLocation
 
     # check that deployment location is in lab metadata
     If (-not ($labMetadata.validRegions -contains $deploymentLocation)) {
@@ -132,8 +145,6 @@ Function Start-LabDeployment {
 $labMetadataPath = './labMetadata.json'
 $labResourcesPath = './labResources/main.bicep'
 
-$hardCodedLocation = 'eastus'
+Test-LabPrerequisites -labMetadataPath $labMetadataPath -labResourcesPath $labResourcesPath -deploymentLocation $deploymentLocation
 
-Test-LabPrerequisites -labMetadataPath $labMetadataPath -labResourcesPath $labResourcesPath -deploymentLocation $hardCodedLocation
-
-Start-LabDeployment -labMetadataPath $labMetadataPath -labResourcesPath $labResourcesPath -deploymentLocation $hardCodedLocation -labInstancePrefix $labInstancePrefix 
+Start-LabDeployment -labMetadataPath $labMetadataPath -labResourcesPath $labResourcesPath -deploymentLocation $script:deploymentLocation -labInstancePrefix $labInstancePrefix 

@@ -200,7 +200,7 @@
           "westus3"
         ]
       },
-      "description": "A list of valid Azure regions for the lab. If the lab can be deployed in any region, use []",
+      "description": "A list of valid Azure regions for the lab. If the lab can be deployed in any region, use [] or exclude this property.",
       "minItems": 1,
       "uniqueItems": true
     },

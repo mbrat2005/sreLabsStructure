@@ -27,7 +27,7 @@ param serviceName string = 'web'
 
 var environmentName = labInstancePrefix
 
-var abbreviations = loadJsonContent('abbreviations.json')
+var abbreviations = loadJsonContent('./data/abbreviations.json')
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
 var tags = {
   'azd-env-name': environmentName
