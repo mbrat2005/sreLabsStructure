@@ -1,5 +1,15 @@
-# function to find and remove deployment stacks related to the lab
+[CmdletBinding()]
+param (
+    [Parameter(Mandatory=$false)]
+    [string]
+    $labInstancePrefix,
 
+    [Parameter(Mandatory=$false)]
+    [switch]
+    $whatIf
+)
+
+# function to find and remove deployment stacks related to the lab
 Function Start-LabInstanceCleanup {
     [CmdletBinding()]
     param (
@@ -39,6 +49,18 @@ Function Start-LabInstanceCleanup {
         exit
     }
 
+    # warn user that they are about to delete the selected deployment stack
+    Write-Host "You are about to delete the following deployment stack:`n"
+    $deploymentStack | Format-Table Name, Location
+    Write-Host "`nThis action cannot be undone.`n"
+    # confirm with the user that they want to delete the selected deployment stack
+    $confirm = $false
+    While (-not $confirm) {
+        $response = (Read-Host "Are you sure you want to delete the deployment stack '$($deploymentStack.Name)'? (y/n)")
+        If ($response -match 'yY') { $confirm = $true }
+        ElseIf ($response -match 'nN') { exit }
+    }
+
     # remove all deployment stacks related to the lab
     Write-Host "Removing deployment stack '$($deploymentStack.Name)'..."
 
@@ -51,3 +73,5 @@ Function Start-LabInstanceCleanup {
         Write-Host "Failed to remove deployment stack '$($deploymentStack.Name)'. See above error for details."
     }
 }
+
+Start-LabInstanceCleanup @PSBoundParameters
