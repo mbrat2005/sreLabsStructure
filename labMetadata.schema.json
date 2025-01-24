@@ -242,11 +242,9 @@
         "properties": {
           "permissionScope": {
             "type": "string",
-            "description": "Scope at which role assignment is required. For example: 'resourceGroup'",
+            "description": "Scope at which role assignment is required. For example: 'subscription'",
             "enum": [
-              "resourceGroup",
-              "subscription",
-              "managementGroup"
+              "subscription"
             ]
           },
           "builtInRoleName": {

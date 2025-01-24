@@ -109,7 +109,18 @@ Function Test-LabPrerequisites {
     }
 
     # check that required permissions for lab resources are available
-    # $labMetadata.deploymentPermissions
+
+    # TODO: following only supports subscription level role assignments and explicit role names (for example, 'Owner" role would include any required permissions)
+    $currentUser = Get-AzADUser -SignedIn
+    $existingRoleAssignments = Get-AzRoleAssignment -Scope "/subscriptions/$($azContext.Subscription.Id)" -ObjectId $currentUser.Id
+    ForEach ($requiredRole in $labMetadata.deploymentPermissions ) {
+        If ($existingRoleAssignments.RoleDefinitionName -notcontains $requiredRole.builtInRoleName) {
+            throw "Required role '$requiredRole' not assigned to user '$($azContext.Account.Id)' in subscription '$($azContext.Subscription.Name)'. Please assign the required role to the user before running this script"
+        }
+        Else {
+            Write-Verbose "Required role '$($requiredRole.builtInRoleName)' assigned to user '$($azContext.Account.Id)' in subscription '$($azContext.Subscription.Name)'"
+        }
+    }
 
     Write-Host "All prerequisites met"
 }
@@ -147,4 +158,9 @@ $labResourcesPath = './labResources/main.bicep'
 
 Test-LabPrerequisites -labMetadataPath $labMetadataPath -labResourcesPath $labResourcesPath -deploymentLocation $deploymentLocation
 
-Start-LabDeployment -labMetadataPath $labMetadataPath -labResourcesPath $labResourcesPath -deploymentLocation $script:deploymentLocation -labInstancePrefix $labInstancePrefix 
+If (!$whatIf) {
+    Start-LabDeployment -labMetadataPath $labMetadataPath -labResourcesPath $labResourcesPath -deploymentLocation $script:deploymentLocation -labInstancePrefix $labInstancePrefix 
+}
+Else {
+    Write-Host "Skipping deployment due to -whatIf flag"
+}

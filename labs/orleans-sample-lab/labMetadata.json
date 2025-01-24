@@ -20,7 +20,7 @@
   "deploymentPermissions": [
     {
       "permissionScope": "resourceGroup",
-      "builtInRoleName": "Contributor"
+      "builtInRoleName": "Owner"
     }
   ],
   "validRegions": [
