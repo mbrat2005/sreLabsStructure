@@ -2,6 +2,10 @@
 param (
     [Parameter()]
     [string]
+    $labContentPath,
+
+    [Parameter()]
+    [string]
     $deploymentLocation,
 
     [Parameter()]
@@ -109,7 +113,6 @@ Function Test-LabPrerequisites {
     }
 
     # check that required permissions for lab resources are available
-
     # TODO: following only supports subscription level role assignments and explicit role names (for example, 'Owner" role would include any required permissions)
     $currentUser = Get-AzADUser -SignedIn
     $existingRoleAssignments = Get-AzRoleAssignment -Scope "/subscriptions/$($azContext.Subscription.Id)" -ObjectId $currentUser.Id
@@ -153,8 +156,29 @@ Function Start-LabDeployment {
     }
 }
 
-$labMetadataPath = './labMetadata.json'
-$labResourcesPath = './labResources/main.bicep'
+If (!$labContentPath) {
+    Write-Host "Enter the file path to the lab directory for the lab you wish to deploy. For example: 'C:\users\sre\sreAcademyLabs\orleans-sample-lab'"
+
+    While (!$labContentPath) {
+        $labContentPath = Read-Host "Lab content path"
+
+        Write-Host "Checking for lab content at '$labContentPath'"
+        If (-not (Test-Path $labContentPath -PathType Container)) {
+            Write-Host "Directory '$labContentPath' was not found or the provided path is not a directory. Please enter a valid path"
+            $labContentPath = $null
+        }
+        ElseIf (!(Test-Path -Path "$labContentPath/labMetadata.json")) {
+            Write-Host "Directory '$labContentPath' was found, but it does not contain a 'labMetadata.json' file. Please enter a valid path to a lab's content directory"
+            $labContentPath = $null
+        }
+        Else {
+            Write-Host "Lab content found at '$labContentPath'"
+        }
+    }
+}
+
+$labMetadataPath = Join-Path -Path $labContentPath -ChildPath 'labMetadata.json'
+$labResourcesPath = Join-Path -Path $labContentPath -ChildPath 'labResources/main.bicep'
 
 Test-LabPrerequisites -labMetadataPath $labMetadataPath -labResourcesPath $labResourcesPath -deploymentLocation $deploymentLocation
 
