@@ -1,3 +1,26 @@
+<#
+.SYNOPSIS
+    Deploys an SRE Academy lab from a local directory
+.DESCRIPTION
+    This PowerShell script test prerequisites, then deploys the selected lab from the SRE Academy lab content directory.
+.NOTES
+    
+.LINK
+    
+.EXAMPLE
+    .\deployLab.ps1 -labContentPath 'C:\users\sre\sreAcademyLabs\orleans-sample-lab' -deploymentLocation 'eastus'
+    Deploys the Orleans sample lab from the specified directory to the 'eastus' region
+
+.EXAMPLE
+    .\deployLab.ps1 -labContentPath 'C:\users\sre\sreAcademyLabs\orleans-sample-lab' -deploymentLocation 'eastus' -labInstancePrefix 'orleans-lab-20210901120000'
+    Deploys the Orleans sample lab from the specified directory to the 'eastus' region with the specified lab instance prefix
+
+.EXAMPLE
+    .\deployLab.ps1 -labContentPath 'C:\users\sre\sreAcademyLabs\orleans-sample-lab' -whatIf
+    Tests prerequisites for deploying the Orleans sample lab from the specified directory, but does not deploy the lab
+#>
+
+
 [CmdletBinding()]
 param (
     [Parameter()]

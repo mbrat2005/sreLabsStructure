@@ -14,8 +14,8 @@ This lab can be deployed in any Azure subscription--it has no dependencies on Mi
 
 1. Open the [Azure Cloud Shell](https://shell.azure.com) and select Powershell if prompted (or ensure that you are using PowerShell by checking that the toolbar has the button 'Switch to Bash'). By using Cloud Shell, we ensure that you do not have to set up any tooling locally.
 1. In Cloud Shell, download a copy of this Git repo using `git clone https://github.com/mbrat2005/sreLabsStructure.git`. 
-1. Navigate to `labs/orleans-sample-lab/labResources` using the `cd` command.
-1. From the `labResources` directory, run the following command to deploy the lab: `../../scripts/deployLab.ps1`
+1. Navigate to the downloaded repo `scripts` directory using the `cd` command.
+1. From the `scripts` directory, call the `deployLab.ps1` script.
 1. Follow the prompts to ensure you are logged in to Azure and have met the prerequisites, then proceed with the deployment. _Note: the deployment runs using a subscription-level Deployment Stack for easy clean up.`
 
 ## Lab Steps

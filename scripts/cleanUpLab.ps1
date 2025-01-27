@@ -1,3 +1,20 @@
+<#
+.SYNOPSIS
+    Cleans up an instance of an SRE Academy lab
+.DESCRIPTION
+    This script cleans up an instance of an SRE Academy lab by removing the deployment stack associated with the lab instance prefix.
+.NOTES
+    Removal of the Deployment Stack ensures that all resources created by the lab are removed from the subscription.
+.LINK
+    
+.EXAMPLE
+    .\cleanUpLab.ps1 -labInstancePrefix 'orleans-lab-20210901120000'
+    Removes the deployment stack associated with the Orleans sample lab instance prefix 'orleans-lab-20210901120000'
+
+.EXAMPLE
+    .\cleanUpLab.ps1 -labInstancePrefix 'orleans-lab-20210901120000' -whatIf
+    Tests prerequisites for removing the deployment stack associated with the Orleans sample lab instance prefix 'orleans-lab-20210901120000', but does not remove the deployment stack
+#>
 [CmdletBinding()]
 param (
     [Parameter(Mandatory=$false)]
