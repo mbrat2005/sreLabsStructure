@@ -89,7 +89,7 @@ Function Test-LabPrerequisites {
     }
 
     # check for bicep in PATH
-    If (-not (Get-Command -CommandType Application -Name bicep.exe -ErrorAction SilentlyContinue)) {
+    If (-not (Get-Command -CommandType Application -Name bicep -ErrorAction SilentlyContinue)) {
         throw "Bicep CLI not found in PATH. Please install Bicep CLI"
     }
 
