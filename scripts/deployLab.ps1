@@ -111,7 +111,7 @@ Function Test-LabPrerequisites {
 
     # check that Az.Quota module is installed
     If (-not (Get-Module -Name Az.Quota -ListAvailable)) {
-        Write-Warning "Az.Quota module not found. Please install Az.Quota module to check quotas"
+        Write-Host -ForegroundColor Yellow "Az.Quota module not found. Please follow the prompts to install Az.Quota from the PowerShell gallery"
 
         Install-Module Az.Quota -Scope CurrentUser
     }
