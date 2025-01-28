@@ -74,8 +74,8 @@ Function Start-LabInstanceCleanup {
     $confirm = $false
     While (-not $confirm) {
         $response = (Read-Host "Are you sure you want to delete the deployment stack '$($deploymentStack.Name)'? (y/n)")
-        If ($response -match 'yY') { $confirm = $true }
-        ElseIf ($response -match 'nN') { exit }
+        If ($response -match '[yY]') { $confirm = $true }
+        ElseIf ($response -match '[nN]') { exit }
     }
 
     # remove all deployment stacks related to the lab
