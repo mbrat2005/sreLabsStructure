@@ -222,12 +222,12 @@ $labMetadataPath = Join-Path -Path $labContentPath -ChildPath 'labMetadata.json'
 $labResourcesPath = Join-Path -Path $labContentPath -ChildPath 'labResources/main.bicep'
 
 If (!$whatIf -and !$studentAlias) {
-    Write-Host "Enter the student Microsoft alias for the lab deployment. For example: 'newsre123'"
+    Write-Host "Enter the student Microsoft alias for the lab deployment (used in tracking). For example: 'newsre123'"
     $studentAlias = Read-Host "Student alias"
 } 
 
 If (!$whatIf -and !$expirationDate) {
-    Write-Host "Enter the expiration date for the lab deployment. For example: '2025-03-01'"
+    Write-Host "Enter the expiration date for the lab deployment (used for cleanup in managed lab environments). For example: '2025-03-01'"
     [datetime]$expirationDate = Read-Host "Expiration date"
 }
 
