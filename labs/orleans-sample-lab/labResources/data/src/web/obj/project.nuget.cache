@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "+q/ZVsK8Wi8=",
+  "dgSpecHash": "ek4eCC5mFfs=",
   "success": true,
-  "projectFilePath": "C:\\Users\\mbratschun\\repos\\orleans-url-shortener\\src\\web\\Orleans.Samples.UrlShortener.Web.csproj",
+  "projectFilePath": "C:\\Users\\mbratschun\\temp\\sample-lab-folder-structure\\labs\\orleans-sample-lab\\labResources\\data\\src\\web\\Orleans.Samples.UrlShortener.Web.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\mbratschun\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\mbratschun\\.nuget\\packages\\microsoft.aspnetcore.connections.abstractions\\8.0.0\\microsoft.aspnetcore.connections.abstractions.8.0.0.nupkg.sha512",

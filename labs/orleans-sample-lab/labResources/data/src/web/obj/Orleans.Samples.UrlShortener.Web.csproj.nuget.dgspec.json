@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\mbratschun\\repos\\orleans-url-shortener\\src\\web\\Orleans.Samples.UrlShortener.Web.csproj": {}
+    "C:\\Users\\mbratschun\\temp\\sample-lab-folder-structure\\labs\\orleans-sample-lab\\labResources\\data\\src\\web\\Orleans.Samples.UrlShortener.Web.csproj": {}
   },
   "projects": {
-    "C:\\Users\\mbratschun\\repos\\orleans-url-shortener\\src\\web\\Orleans.Samples.UrlShortener.Web.csproj": {
+    "C:\\Users\\mbratschun\\temp\\sample-lab-folder-structure\\labs\\orleans-sample-lab\\labResources\\data\\src\\web\\Orleans.Samples.UrlShortener.Web.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\mbratschun\\repos\\orleans-url-shortener\\src\\web\\Orleans.Samples.UrlShortener.Web.csproj",
+        "projectUniqueName": "C:\\Users\\mbratschun\\temp\\sample-lab-folder-structure\\labs\\orleans-sample-lab\\labResources\\data\\src\\web\\Orleans.Samples.UrlShortener.Web.csproj",
         "projectName": "Orleans.Samples.UrlShortener.Web",
-        "projectPath": "C:\\Users\\mbratschun\\repos\\orleans-url-shortener\\src\\web\\Orleans.Samples.UrlShortener.Web.csproj",
+        "projectPath": "C:\\Users\\mbratschun\\temp\\sample-lab-folder-structure\\labs\\orleans-sample-lab\\labResources\\data\\src\\web\\Orleans.Samples.UrlShortener.Web.csproj",
         "packagesPath": "C:\\Users\\mbratschun\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\mbratschun\\repos\\orleans-url-shortener\\src\\web\\obj\\",
+        "outputPath": "C:\\Users\\mbratschun\\temp\\sample-lab-folder-structure\\labs\\orleans-sample-lab\\labResources\\data\\src\\web\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\mbratschun\\AppData\\Roaming\\NuGet\\NuGet.Config"

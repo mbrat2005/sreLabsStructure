@@ -1,5 +1,5 @@
 {
-  "$schema": "../../labMetadata.schema.json",
+  "$schema": "../labMetadata.schema.json",
   "cleanupProcedure": "asd",
   "contentOwners": [
     "mbratschun"
