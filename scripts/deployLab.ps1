@@ -8,11 +8,11 @@
 .LINK
     
 .EXAMPLE
-    .\deployLab.ps1 -labContentPath 'C:\users\sre\sreAcademyLabs\orleans-sample-lab' -deploymentLocation 'eastus'
+    .\deployLab.ps1 -labContentPath 'C:\users\sre\sreAcademyLabs\orleans-sample-lab' -deploymentLocation 'eastus' -studentAlias 'newsre123' -expirationDate '2025-03-01'
     Deploys the Orleans sample lab from the specified directory to the 'eastus' region
 
 .EXAMPLE
-    .\deployLab.ps1 -labContentPath 'C:\users\sre\sreAcademyLabs\orleans-sample-lab' -deploymentLocation 'eastus' -labInstancePrefix 'orleans-lab-20210901120000'
+    .\deployLab.ps1 -labContentPath 'C:\users\sre\sreAcademyLabs\orleans-sample-lab' -deploymentLocation 'eastus' -labInstancePrefix 'orleans-lab-20210901120000' -studentAlias 'newsre123' -expirationDate '2025-03-01'
     Deploys the Orleans sample lab from the specified directory to the 'eastus' region with the specified lab instance prefix
 
 .EXAMPLE
@@ -34,6 +34,14 @@ param (
     [Parameter()]
     [string]
     $labInstancePrefix = ('adhoc-sre-lab_{0}' -f (Get-Date -Format 'yyyyMMddHHmmss')),
+
+    [Parameter()]
+    [string]
+    $studentAlias,
+
+    [Parameter()]
+    [datetime]
+    $expirationDate,
 
     [Parameter()]
     [switch]
@@ -168,7 +176,15 @@ Function Start-LabDeployment {
 
         [Parameter(Mandatory=$true)]
         [string]
-        $labInstancePrefix
+        $labInstancePrefix,
+
+        [Parameter(Mandatory=$true)]
+        [string]
+        $studentAlias,
+
+        [Parameter(Mandatory=$true)]
+        [datetime]
+        $expirationDate
     )
 
     $labMetadata = Get-Content $labMetadataPath | ConvertFrom-Json
@@ -176,7 +192,9 @@ Function Start-LabDeployment {
     New-AzSubscriptionDeploymentStack -Name $labInstancePrefix -Location $deploymentLocation -TemplateFile $labResourcesPath -ActionOnUnmanage DeleteAll -DenySettingsMode None -TemplateParameterObject @{
         location = $deploymentLocation
         labInstancePrefix = $labInstancePrefix
-    }
+        studentAlias = $studentAlias
+        expirationDate = $expirationDate
+    } -Tag @{studentAlias = $studentAlias; labInstancePrefix = $labInstancePrefix; expirationDate = $expirationDate}
 }
 
 If (!$labContentPath) {
@@ -203,10 +221,33 @@ If (!$labContentPath) {
 $labMetadataPath = Join-Path -Path $labContentPath -ChildPath 'labMetadata.json'
 $labResourcesPath = Join-Path -Path $labContentPath -ChildPath 'labResources/main.bicep'
 
-Test-LabPrerequisites -labMetadataPath $labMetadataPath -labResourcesPath $labResourcesPath -deploymentLocation $deploymentLocation
+If (!$whatIf -and !$studentAlias) {
+    Write-Host "Enter the student Microsoft alias for the lab deployment. For example: 'newsre123'"
+    $studentAlias = Read-Host "Student alias"
+} 
+
+If (!$whatIf -and !$expirationDate) {
+    Write-Host "Enter the expiration date for the lab deployment. For example: '2025-03-01'"
+    [datetime]$expirationDate = Read-Host "Expiration date"
+}
+
+# set initial lab parameters object for testing prerequisites
+$labParameters = @{
+    labMetadataPath = $labMetadataPath
+    labResourcesPath = $labResourcesPath
+    deploymentLocation = $deploymentLocation
+}
+
+Test-LabPrerequisites @labParameters
+
+# update lab parameters object for deployment
+$labParameters.Add('labInstancePrefix', $labInstancePrefix)
+$labParameters.Add('studentAlias', $studentAlias)
+$labParameters.Add('expirationDate', $expirationDate)
+$labParameters.Set('deploymentLocation', $script:deploymentLocation)
 
 If (!$whatIf) {
-    Start-LabDeployment -labMetadataPath $labMetadataPath -labResourcesPath $labResourcesPath -deploymentLocation $script:deploymentLocation -labInstancePrefix $labInstancePrefix 
+    Start-LabDeployment @labParameters
 }
 Else {
     Write-Host "Skipping deployment due to -whatIf flag"

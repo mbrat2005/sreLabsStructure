@@ -5,6 +5,10 @@ targetScope = 'subscription'
 @description('Name of the environment that can be used as part of naming resource convention.')
 param labInstancePrefix string
 
+param studentAlias string
+
+param expirationDate string
+
 @minLength(1)
 @description('Primary location for all resources.')
 param location string
@@ -32,6 +36,8 @@ var resourceToken = toLower(uniqueString(subscription().id, environmentName, loc
 var tags = {
   'azd-env-name': environmentName
   repo: 'https://github.com/azure-samples/orleans-url-shortener'
+  student: studentAlias
+  expires: expirationDate
 }
 
 // Define resource group
