@@ -41,12 +41,12 @@ Function Start-LabInstanceCleanup {
 
     # if no lab instance prefix was provided, get all subscription level deployment stacks
     If (-not $labInstancePrefix) {
-        $deploymentStacks = Get-AzSubscriptionDeploymentStack
+        $deploymentStacks = Get-AzSubscriptionDeploymentStack | Where-Object { $_.tags.Keys -contains 'labInstancePrefix' }
     }
     Else {
 
     # get all deployment stacks related to the lab
-    $deploymentStacks = Get-AzSubscriptionDeploymentStack | Where-Object { $_.Name -like "$labInstancePrefix*" }
+    $deploymentStacks = Get-AzSubscriptionDeploymentStack | Where-Object { $_.Name -like "$labInstancePrefix*" -and $_.tags.Keys -contains 'labInstancePrefix'}
     }
 
     # if more than one deployment stack found, allow the user to select the one to remove
