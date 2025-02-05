@@ -51,15 +51,15 @@ param (
 Function Test-LabPrerequisites {
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string]
         $labMetadataPath,
 
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string]
         $labResourcesPath,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string]
         $deploymentLocation
     )
@@ -162,27 +162,27 @@ Function Test-LabPrerequisites {
 Function Start-LabDeployment {
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string]
         $labMetadataPath,
 
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string]
         $labResourcesPath,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string]
         $deploymentLocation,
 
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string]
         $labInstancePrefix,
 
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string]
         $studentAlias,
 
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [datetime]
         $expirationDate
     )
@@ -190,30 +190,49 @@ Function Start-LabDeployment {
     $labMetadata = Get-Content $labMetadataPath | ConvertFrom-Json
 
     New-AzSubscriptionDeploymentStack -Name $labInstancePrefix -Location $deploymentLocation -TemplateFile $labResourcesPath -ActionOnUnmanage DeleteAll -DenySettingsMode None -TemplateParameterObject @{
-        location = $deploymentLocation
+        location          = $deploymentLocation
         labInstancePrefix = $labInstancePrefix
-        studentAlias = $studentAlias
-        expirationDate = $expirationDate
-    } -Tag @{studentAlias = $studentAlias; labInstancePrefix = $labInstancePrefix; expirationDate = $expirationDate}
+        studentAlias      = $studentAlias
+        expirationDate    = $expirationDate
+    } -Tag @{studentAlias = $studentAlias; labInstancePrefix = $labInstancePrefix; expirationDate = $expirationDate }
 }
 
 If (!$labContentPath) {
     Write-Host "Enter the file path to the lab directory for the lab you wish to deploy. For example: 'C:\users\sre\sreAcademyLabs\orleans-sample-lab'"
 
-    While (!$labContentPath) {
-        $labContentPath = Read-Host "Lab content path"
+    If ((Get-Item $pwd).BaseName -eq 'scripts') {
+        Write-Verbose "Current directory is 'scripts'. Assuming lab content is in parent directory"
 
-        Write-Host "Checking for lab content at '$labContentPath'"
-        If (-not (Test-Path $labContentPath -PathType Container)) {
-            Write-Host "Directory '$labContentPath' was not found or the provided path is not a directory. Please enter a valid path"
-            $labContentPath = $null
+        $labDirList = Get-ChildItem -Path '../lab' | Where-Object { $_.Name -notmatch '^_' }
+
+        for ($i = 0; $i -lt $labDirList.Count; $i++) {
+            Write-Host "$i. $($labDirList[$i].Name)"
         }
-        ElseIf (!(Test-Path -Path "$labContentPath/labMetadata.json")) {
-            Write-Host "Directory '$labContentPath' was found, but it does not contain a 'labMetadata.json' file. Please enter a valid path to a lab's content directory"
-            $labContentPath = $null
+
+        $selection = Read-Host "Select the lab directory by number"
+        if ($selection -match '^\d+$' -and [int]$selection -ge 0 -and [int]$selection -lt $labDirList.Count) {
+            $labContentPath = $labDirList[$selection].FullName
         }
-        Else {
-            Write-Host "Lab content found at '$labContentPath'"
+        else {
+            Write-Host "Invalid selection. Please enter a valid number."
+        }
+    }
+    Else {
+        While (!$labContentPath) {
+            $labContentPath = Read-Host "Lab content path"
+
+            Write-Host "Checking for lab content at '$labContentPath'"
+            If (-not (Test-Path $labContentPath -PathType Container)) {
+                Write-Host "Directory '$labContentPath' was not found or the provided path is not a directory. Please enter a valid path"
+                $labContentPath = $null
+            }
+            ElseIf (!(Test-Path -Path "$labContentPath/labMetadata.json")) {
+                Write-Host "Directory '$labContentPath' was found, but it does not contain a 'labMetadata.json' file. Please enter a valid path to a lab's content directory"
+                $labContentPath = $null
+            }
+            Else {
+                Write-Host "Lab content found at '$labContentPath'"
+            }
         }
     }
 }
@@ -233,8 +252,8 @@ If (!$whatIf -and !$expirationDate) {
 
 # set initial lab parameters object for testing prerequisites
 $labParameters = @{
-    labMetadataPath = $labMetadataPath
-    labResourcesPath = $labResourcesPath
+    labMetadataPath    = $labMetadataPath
+    labResourcesPath   = $labResourcesPath
     deploymentLocation = $deploymentLocation
 }
 
@@ -244,7 +263,7 @@ Test-LabPrerequisites @labParameters
 $labParameters.Add('labInstancePrefix', $labInstancePrefix)
 $labParameters.Add('studentAlias', $studentAlias)
 $labParameters.Add('expirationDate', $expirationDate)
-$labParameters.Set('deploymentLocation', $script:deploymentLocation)
+$labParameters.deploymentLocation = $script:deploymentLocation
 
 If (!$whatIf) {
     Start-LabDeployment @labParameters
