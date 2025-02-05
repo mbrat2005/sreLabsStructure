@@ -48,6 +48,8 @@ param (
     $whatIf
 )
 
+$ErrorActionPreference = 'Stop'
+
 Function Test-LabPrerequisites {
     [CmdletBinding()]
     param (
@@ -115,6 +117,18 @@ Function Test-LabPrerequisites {
         until ($response -match '[nNYy]')
     
         If ($response -match 'nN') { exit }
+    }
+
+    # check that Quota resource provider is registered
+    If ((Get-AzResourceProvider -ProviderNamespace Microsoft.Quota ).RegistrationState -ne 'Registered') {
+        Write-Host "MicrosoftQuota resource provider not registered. We will register it now."
+
+        Register-AzResourceProvider -ProviderNamespace Microsoft.Quota
+
+        While ((Get-AzResourceProvider -ProviderNamespace Microsoft.Quota ).RegistrationState -ne 'Registered') {
+            Write-Host "Waiting for Microsoft.Quota resource provider to register..."
+            Start-Sleep -Seconds 5
+        }
     }
 
     # check that Az.Quota module is installed
@@ -198,7 +212,6 @@ Function Start-LabDeployment {
 }
 
 If (!$labContentPath) {
-    Write-Host "Enter the file path to the lab directory for the lab you wish to deploy. For example: 'C:\users\sre\sreAcademyLabs\orleans-sample-lab'"
 
     If ((Get-Item $pwd).BaseName -eq 'scripts') {
         Write-Verbose "Current directory is 'scripts'. Assuming lab content is in parent directory"
@@ -209,7 +222,7 @@ If (!$labContentPath) {
             Write-Host "$i. $($labDirList[$i].Name)"
         }
 
-        $selection = Read-Host "Select the lab directory by number"
+        $selection = Read-Host "Select the lab to deploy by number"
         if ($selection -match '^\d+$' -and [int]$selection -ge 0 -and [int]$selection -lt $labDirList.Count) {
             $labContentPath = $labDirList[$selection].FullName
         }
