@@ -259,8 +259,15 @@ If (!$whatIf -and !$studentAlias) {
 } 
 
 If (!$whatIf -and !$expirationDate) {
-    Write-Host "Enter the expiration date for the lab deployment (used for cleanup in managed lab environments). For example: '2025-mar-01'"
-    [datetime]$expirationDate = Read-Host "Expiration date"
+    Write-Host "Enter the expiration date for the lab deployment (used for cleanup in managed lab environments). For example: 'yyyy-MM-dd'"
+    $expirationDateString = Read-Host "Expiration date"
+
+    While (!($expirationDateString -as [datetime])) {
+        Write-Host "Invalid date format. Please enter a valid date in the format 'yyyy-MM-dd'"
+        $expirationDateString = Read-Host "Expiration date"
+    }
+
+    $expirationDate = $expirationDateString -as [datetime]    
 }
 
 # set initial lab parameters object for testing prerequisites

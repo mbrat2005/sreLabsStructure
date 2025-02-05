@@ -53,8 +53,17 @@ Function Start-LabInstanceCleanup {
     If ($deploymentStacks.Count -gt 1) {
         Write-Host "Multiple deployment stacks found for lab instance prefix '$labInstancePrefix'. Select the one to remove in the new window.`n"
 
-        $deploymentStacks | Format-Table Name, Location
-        $deploymentStack = $deploymentStacks | Out-GridView -Title "Select the deployment stack to remove" -PassThru
+        for ($i = 0; $i -lt $deploymentStacks.Count; $i++) {
+            Write-Host "$i. $($deploymentStacks[$i].Name)"
+        }
+
+        $selection = Read-Host "Enter the number of the deployment stack to remove"
+        if ($selection -match '^\d+$' -and [int]$selection -ge 0 -and [int]$selection -lt $deploymentStacks.Count) {
+            $deploymentStack = $deploymentStacks[$selection]
+        } else {
+            Write-Host "Invalid selection. Exiting."
+            exit
+        }
     }
     # if only one deployment stack found, use that one
     ElseIf ($deploymentStacks.Count -eq 1) {
