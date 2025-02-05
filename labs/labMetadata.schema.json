@@ -200,7 +200,7 @@
           "westus3"
         ]
       },
-      "description": "A list of valid Azure regions for the lab. If the lab can be deployed in any region, use []",
+      "description": "A list of valid Azure regions for the lab. If the lab can be deployed in any region, use [] or exclude this property.",
       "minItems": 1,
       "uniqueItems": true
     },
@@ -216,6 +216,10 @@
           "quotaAmount": {
             "type": "integer",
             "description": "The amount of the quota required"
+          },
+          "quotaResourceProvider": {
+            "type": "string",
+            "description": "The resource provider for the quota. For example: 'Microsoft.Compute'"
           }
         }
       },
@@ -231,8 +235,24 @@
       ]
     },
     "deploymentPermissions": {
-      "type": "string",
-      "description": "Permissions required to deploy the lab if other than contributor at the resource group scope"
+      "type": "array",
+      "description": "Permissions required to deploy the lab if other than contributor at the resource group scope",
+      "items": {
+        "type": "object",
+        "properties": {
+          "permissionScope": {
+            "type": "string",
+            "description": "Scope at which role assignment is required. For example: 'subscription'",
+            "enum": [
+              "subscription"
+            ]
+          },
+          "builtInRoleName": {
+            "type": "string",
+            "description": "Name of the built-in role required. For example: 'Contributor'"
+          }
+        }
+      }
     },
     "deploymentProcedure": {
       "type": "string",

@@ -1,0 +1,30 @@
+{
+  "$schema": "../labMetadata.schema.json",
+  "cleanupProcedure": "none",
+  "contentOwners": [
+    "mbratschun"
+  ],
+  "maximumParticipants": 0,
+  "requiredRetention": 0,
+  "requiredQuotas": [
+    {
+      "quotaName": "ManagedEnvironmentCount",
+      "quotaAmount": 1,
+      "quotaResourceProvider": "Microsoft.App"
+    }
+  ],
+  "deploymentProcedure": "none",
+  "labType": "individual",
+  "identityType": "lab",
+  "deliveryFormat": "instructor-led",
+  "deploymentPermissions": [
+    {
+      "permissionScope": "resourceGroup",
+      "builtInRoleName": "Owner"
+    }
+  ],
+  "validRegions": [
+    "eastus",
+    "westus"
+  ]
+}
