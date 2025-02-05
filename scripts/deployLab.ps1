@@ -203,7 +203,7 @@ If (!$labContentPath) {
     If ((Get-Item $pwd).BaseName -eq 'scripts') {
         Write-Verbose "Current directory is 'scripts'. Assuming lab content is in parent directory"
 
-        $labDirList = Get-ChildItem -Path '../lab' | Where-Object { $_.Name -notmatch '^_' }
+        $labDirList = Get-ChildItem -Path '../labs' | Where-Object { $_.Name -notmatch '^_' }
 
         for ($i = 0; $i -lt $labDirList.Count; $i++) {
             Write-Host "$i. $($labDirList[$i].Name)"
