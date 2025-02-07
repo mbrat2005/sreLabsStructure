@@ -120,14 +120,19 @@ Function Test-LabPrerequisites {
     }
 
     # check that Quota resource provider is registered
-    if ((Get-AzResourceProvider -ProviderNamespace Microsoft.Quota ).RegistrationState -Contains 'NotRegistered') {
+    if ((Get-AzResourceProvider -ProviderNamespace Microsoft.Quota | Where-Object {$_.ResourceTypes.ResourceTypeName -eq 'quotas'} ).RegistrationState -ne 'Registered') {
         Write-Host "Microsoft.Quota resource provider not registered. We will register it now."
 
         Register-AzResourceProvider -ProviderNamespace Microsoft.Quota
 
-        While ((Get-AzResourceProvider -ProviderNamespace Microsoft.Quota ).RegistrationState -ne 'Registered') {
+        $stopWatch = [System.Diagnostics.Stopwatch]::StartNew()
+        While ((Get-AzResourceProvider -ProviderNamespace Microsoft.Quota | Where-Object {$_.ResourceTypes.ResourceTypeName -eq 'quotas'} ).RegistrationState -ne 'Registered' -and $stopWatch.Elapsed.TotalMinutes -lt 15) {
             Write-Host "Waiting for Microsoft.Quota resource provider to register..."
             Start-Sleep -Seconds 5
+        }
+
+        If ($stopWatch.Elapsed.TotalMinutes -ge 15) {
+            throw "Microsoft.Quota resource provider registration timed out. Please try again later."
         }
     }
     Else {
