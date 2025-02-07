@@ -160,7 +160,7 @@ Function Test-LabPrerequisites {
         Write-Verbose "Calculating available quota by subtracting usage ('$($usage.UsageValue)') from limit ('$($quota.Limit.Value)')"
         $availableQuota = $quota.Limit.Value - $usage.UsageValue
 
-        If ($requiredQuota.quotaAmount -ge $availableQuota) {
+        If ($requiredQuota.quotaAmount -gt $availableQuota) {
             throw "Quota for '$($requiredQuota.quotaName)' in $($deploymentLocation) is at the available limit. Required '$($requiredQuota.quotaAmount)', Available: '$availableQuota'. This means that the Azure subscription you are attempting to deploy into already has more of this resource type than the current quota allows in this region or that none are allowed. Either use another region or subscription for you deployment which as sufficient quota. Alternatively, clean up the resources using your quota or request a quota increase in the Portal > Subscriptions > Quotas page."
         }
         Else {
