@@ -290,7 +290,7 @@ If (!$whatIf -and !$studentAlias) {
 #     $expirationDate = $expirationDateString -as [datetime]    
 # }
 If (!$expirationDate) {
-    $expirationDate = '00/00/0000'
+    $expirationDate = '01/01/2000'
 }
 
 # set initial lab parameters object for testing prerequisites
