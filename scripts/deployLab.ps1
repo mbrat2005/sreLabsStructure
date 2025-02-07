@@ -120,8 +120,8 @@ Function Test-LabPrerequisites {
     }
 
     # check that Quota resource provider is registered
-    If ((Get-AzResourceProvider -ProviderNamespace Microsoft.Quota ).RegistrationState -ne 'Registered') {
-        Write-Host "MicrosoftQuota resource provider not registered. We will register it now."
+    if ((Get-AzResourceProvider -ProviderNamespace Microsoft.Quota ).RegistrationState -Contains 'NotRegistered') {
+        Write-Host "Microsoft.Quota resource provider not registered. We will register it now."
 
         Register-AzResourceProvider -ProviderNamespace Microsoft.Quota
 
@@ -130,12 +130,17 @@ Function Test-LabPrerequisites {
             Start-Sleep -Seconds 5
         }
     }
+    Else {
+        Write-Verbose "Microsoft.Quota resource provider is registered"
+    }
 
     # check that Az.Quota module is installed
     If (-not (Get-Module -Name Az.Quota -ListAvailable)) {
         Write-Host -ForegroundColor Yellow "Az.Quota module not found. Please follow the prompts to install Az.Quota from the PowerShell gallery"
 
+        Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted
         Install-Module Az.Quota -Scope CurrentUser
+        Set-PSRepository -Name 'PSGallery' -InstallationPolicy Untrusted
     }
 
     # check that quotas are available in required regions
@@ -213,22 +218,30 @@ Function Start-LabDeployment {
 
 If (!$labContentPath) {
 
-    If ((Get-Item $pwd).BaseName -eq 'scripts') {
+    If ((Get-Item $pwd).BaseName -eq 'scripts' -and (Get-ChildItem '../labs' -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -notmatch '^_' }).count -gt 0) {
         Write-Verbose "Current directory is 'scripts'. Assuming lab content is in parent directory"
 
         $labDirList = Get-ChildItem -Path '../labs' -Directory | Where-Object { $_.Name -notmatch '^_' }
 
-        for ($i = 0; $i -lt $labDirList.Count; $i++) {
-            Write-Host "$i. $($labDirList[$i].Name)"
+        If ($labDirList.Count -eq 0) {
+            Write-Error "No labs found in the '../labs' directory. Please provide the path to the lab content directory" -ErropAction Stop
         }
 
-        $selection = Read-Host "Select the lab to deploy by number"
-        if ($selection -match '^\d+$' -and [int]$selection -ge 0 -and [int]$selection -lt $labDirList.Count) {
-            $labContentPath = $labDirList[$selection].FullName
+        Write-Host "Labs found in the '../labs' directory:"
+        for ($i = 1; $i -eq ($labDirList.Count ); $i++) {
+            Write-Host "`t$i. $($labDirList[$i -1].Name)"
         }
-        else {
-            Write-Host "Invalid selection. Please enter a valid number."
-        }
+
+        do {
+            $selection = Read-Host "Select the lab to deploy by number"
+            if ($selection -match '^\d+$' -and [int]$selection -ge 1 -and [int]$selection -le $labDirList.Count) {
+            $labContentPath = $labDirList[$selection - 1].FullName
+            }
+            else {
+            Write-Host "Invalid selection. Please enter a valid lab number."
+            $selection = $null
+            }
+        } while (-not $labContentPath)
     }
     Else {
         While (!$labContentPath) {
