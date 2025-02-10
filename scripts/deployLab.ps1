@@ -44,6 +44,12 @@ param (
     [datetime]
     $expirationDate,
 
+    # skips the configured quota check before deployment. deployment may fail if quotas are exceeded
+    # use to work around issue installing in the Az.Quota module, registering the Microsoft.Quota resource provider, or incorrect quota definition
+    [Parameter()]
+    [switch]
+    $skipQuotaCheck,
+
     [Parameter()]
     [switch]
     $whatIf
@@ -120,52 +126,58 @@ Function Test-LabPrerequisites {
         If ($response -match 'nN') { exit }
     }
 
-    # check that Quota resource provider is registered
-    if ((Get-AzResourceProvider -ProviderNamespace Microsoft.Quota | Where-Object {$_.ResourceTypes.ResourceTypeName -eq 'quotas'} ).RegistrationState -ne 'Registered') {
-        Write-Host "Microsoft.Quota resource provider not registered. We will register it now."
+    If (!$skipQuotaCheck) {
 
-        Register-AzResourceProvider -ProviderNamespace Microsoft.Quota
+        # check that Quota resource provider is registered
+        if ((Get-AzResourceProvider -ProviderNamespace Microsoft.Quota | Where-Object { $_.ResourceTypes.ResourceTypeName -eq 'quotas' } ).RegistrationState -ne 'Registered') {
+            Write-Host "Microsoft.Quota resource provider not registered. We will register it now."
 
-        $stopWatch = [System.Diagnostics.Stopwatch]::StartNew()
-        While ((Get-AzResourceProvider -ProviderNamespace Microsoft.Quota | Where-Object {$_.ResourceTypes.ResourceTypeName -eq 'quotas'} ).RegistrationState -ne 'Registered' -and $stopWatch.Elapsed.TotalMinutes -lt 15) {
-            Write-Host "Waiting for Microsoft.Quota resource provider to register..."
-            Start-Sleep -Seconds 5
+            Register-AzResourceProvider -ProviderNamespace Microsoft.Quota
+
+            $stopWatch = [System.Diagnostics.Stopwatch]::StartNew()
+            While ((Get-AzResourceProvider -ProviderNamespace Microsoft.Quota | Where-Object { $_.ResourceTypes.ResourceTypeName -eq 'quotas' } ).RegistrationState -ne 'Registered' -and $stopWatch.Elapsed.TotalMinutes -lt 15) {
+                Write-Host "Waiting for Microsoft.Quota resource provider to register..."
+                Start-Sleep -Seconds 5
+            }
+
+            If ($stopWatch.Elapsed.TotalMinutes -ge 15) {
+                throw "Microsoft.Quota resource provider registration timed out. Please try again later."
+            }
+        }
+        Else {
+            Write-Verbose "Microsoft.Quota resource provider is registered"
         }
 
-        If ($stopWatch.Elapsed.TotalMinutes -ge 15) {
-            throw "Microsoft.Quota resource provider registration timed out. Please try again later."
+        # check that Az.Quota module is installed
+        If (-not (Get-Module -Name Az.Quota -ListAvailable)) {
+            Write-Host -ForegroundColor Yellow "Az.Quota module not found. Please follow the prompts to install Az.Quota from the PowerShell gallery"
+
+            Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted
+            Install-Module Az.Quota -Scope CurrentUser
+            Set-PSRepository -Name 'PSGallery' -InstallationPolicy Untrusted
+        }
+
+        # check that quotas are available in required regions
+        ForEach ($requiredQuota in $labMetadata.requiredQuotas) {
+            $scopeString = "/subscriptions/{0}/providers/{1}/locations/{2}" -f $azContext.Subscription.Id, $requiredQuota.quotaResourceProvider, $deploymentLocation
+        
+            Write-Verbose "Checking quota for '$scopeString'"
+            $quota = Get-AzQuota -Scope $scopeString -ResourceName $requiredQuota.quotaName
+            $usage = Get-AzQuotaUsage -Scope $scopeString -Name $requiredQuota.quotaName
+
+            Write-Verbose "Calculating available quota by subtracting usage ('$($usage.UsageValue)') from limit ('$($quota.Limit.Value)')"
+            $availableQuota = $quota.Limit.Value - $usage.UsageValue
+
+            If ($requiredQuota.quotaAmount -gt $availableQuota) {
+                throw "Quota for '$($requiredQuota.quotaName)' in $($deploymentLocation) is at the available limit. Required '$($requiredQuota.quotaAmount)', Available: '$availableQuota'. This means that the Azure subscription you are attempting to deploy into already has more of this resource type than the current quota allows in this region or that none are allowed. Either use another region or subscription for you deployment which as sufficient quota. Alternatively, clean up the resources using your quota or request a quota increase in the Portal > Subscriptions > Quotas page."
+            }
+            Else {
+                Write-Verbose "Sufficient quota for '$($requiredQuota.quotaName)' in '$deploymentLocation'. Required: '$($requiredQuota.quotaAmount)', Available: '$availableQuota'"
+            }
         }
     }
     Else {
-        Write-Verbose "Microsoft.Quota resource provider is registered"
-    }
-
-    # check that Az.Quota module is installed
-    If (-not (Get-Module -Name Az.Quota -ListAvailable)) {
-        Write-Host -ForegroundColor Yellow "Az.Quota module not found. Please follow the prompts to install Az.Quota from the PowerShell gallery"
-
-        Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted
-        Install-Module Az.Quota -Scope CurrentUser
-        Set-PSRepository -Name 'PSGallery' -InstallationPolicy Untrusted
-    }
-
-    # check that quotas are available in required regions
-    ForEach ($requiredQuota in $labMetadata.requiredQuotas) {
-        $scopeString = "/subscriptions/{0}/providers/{1}/locations/{2}" -f $azContext.Subscription.Id, $requiredQuota.quotaResourceProvider, $deploymentLocation
-        
-        Write-Verbose "Checking quota for '$scopeString'"
-        $quota = Get-AzQuota -Scope $scopeString -ResourceName $requiredQuota.quotaName
-        $usage = Get-AzQuotaUsage -Scope $scopeString -Name $requiredQuota.quotaName
-
-        Write-Verbose "Calculating available quota by subtracting usage ('$($usage.UsageValue)') from limit ('$($quota.Limit.Value)')"
-        $availableQuota = $quota.Limit.Value - $usage.UsageValue
-
-        If ($requiredQuota.quotaAmount -gt $availableQuota) {
-            throw "Quota for '$($requiredQuota.quotaName)' in $($deploymentLocation) is at the available limit. Required '$($requiredQuota.quotaAmount)', Available: '$availableQuota'. This means that the Azure subscription you are attempting to deploy into already has more of this resource type than the current quota allows in this region or that none are allowed. Either use another region or subscription for you deployment which as sufficient quota. Alternatively, clean up the resources using your quota or request a quota increase in the Portal > Subscriptions > Quotas page."
-        }
-        Else {
-            Write-Verbose "Sufficient quota for '$($requiredQuota.quotaName)' in '$deploymentLocation'. Required: '$($requiredQuota.quotaAmount)', Available: '$availableQuota'"
-        }
+        Write-Host "Skipping quota check due to -skipQuotaCheck flag"
     }
 
     # check that required permissions for lab resources are available
@@ -241,11 +253,11 @@ If (!$labContentPath) {
         do {
             $selection = Read-Host "Select the lab to deploy by number"
             if ($selection -match '^\d+$' -and [int]$selection -ge 1 -and [int]$selection -le $labDirList.Count) {
-            $labContentPath = $labDirList[$selection - 1].FullName
+                $labContentPath = $labDirList[$selection - 1].FullName
             }
             else {
-            Write-Host "Invalid selection. Please enter a valid lab number."
-            $selection = $null
+                Write-Host "Invalid selection. Please enter a valid lab number."
+                $selection = $null
             }
         } while (-not $labContentPath)
     }
