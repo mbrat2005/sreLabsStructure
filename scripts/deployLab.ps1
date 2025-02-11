@@ -182,15 +182,17 @@ Function Test-LabPrerequisites {
 
     # check that required permissions for lab resources are available
     # TODO: following only supports subscription level role assignments and explicit role names (for example, 'Owner" role would include any required permissions)
+    # --> Using the get permissions call from the REST API https://learn.microsoft.com/en-us/rest/api/authorization/permissions/list-for-resource-group?view=rest-authorization-2022-04-01&tabs=HTTP could 
+    #     get the assigned permissions, regardless of the role assigned. However, this would require more work from the lab content owner to define the specific permission...
     $currentUser = Get-AzADUser -SignedIn
     $existingRoleAssignments = Get-AzRoleAssignment -Scope "/subscriptions/$($azContext.Subscription.Id)" -ObjectId $currentUser.Id
     ForEach ($requiredRole in $labMetadata.deploymentPermissions ) {
         If ($existingRoleAssignments.RoleDefinitionName -notcontains $requiredRole.builtInRoleName) {
-            Write-Verbose "Existing role assignments: $($existingRoleAssignments.RoleDefinitionName -join ', ') on subscription '$($azContext.Subscription.Name)'"
-            throw "Required role '$($requiredRole.builtInRoleName)' not assigned to user '$($currentUser)' in subscription '$($azContext.Subscription.Name)'. Please assign the required role to the user before running this script"
+            Write-Verbose "Existing role assignments: '$($existingRoleAssignments.RoleDefinitionName -join ', ')' on subscription '$($azContext.Subscription.Name)'"
+            throw "Required role '$($requiredRole.builtInRoleName)' not assigned to user '$($currentUser.Id)' in subscription '$($azContext.Subscription.Name)'. Please assign the required role to the user before running this script"
         }
         Else {
-            Write-Verbose "Required role '$($requiredRole.builtInRoleName)' assigned to user '$($currentUser)' in subscription '$($azContext.Subscription.Name)'"
+            Write-Verbose "Required role '$($requiredRole.builtInRoleName)' assigned to user '$($currentUser.Id)' in subscription '$($azContext.Subscription.Name)'"
         }
     }
 
