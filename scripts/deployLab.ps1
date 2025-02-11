@@ -186,10 +186,11 @@ Function Test-LabPrerequisites {
     $existingRoleAssignments = Get-AzRoleAssignment -Scope "/subscriptions/$($azContext.Subscription.Id)" -ObjectId $currentUser.Id
     ForEach ($requiredRole in $labMetadata.deploymentPermissions ) {
         If ($existingRoleAssignments.RoleDefinitionName -notcontains $requiredRole.builtInRoleName) {
-            throw "Required role '$requiredRole' not assigned to user '$($azContext.Account.Id)' in subscription '$($azContext.Subscription.Name)'. Please assign the required role to the user before running this script"
+            Write-Verbose "Existing role assignments: $($existingRoleAssignments.RoleDefinitionName -join ', ') on subscription '$($azContext.Subscription.Name)'"
+            throw "Required role '$($requiredRole.builtInRoleName)' not assigned to user '$($currentUser)' in subscription '$($azContext.Subscription.Name)'. Please assign the required role to the user before running this script"
         }
         Else {
-            Write-Verbose "Required role '$($requiredRole.builtInRoleName)' assigned to user '$($azContext.Account.Id)' in subscription '$($azContext.Subscription.Name)'"
+            Write-Verbose "Required role '$($requiredRole.builtInRoleName)' assigned to user '$($currentUser)' in subscription '$($azContext.Subscription.Name)'"
         }
     }
 
