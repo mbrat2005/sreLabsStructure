@@ -40,7 +40,7 @@ This lab can be deployed in any Azure subscription--it has no dependencies on Mi
 ### Build Custom Container Image
 
 1. Next, we will build our custom container image using the Azure Container Registry, then switch our Container App to use our new image:
-1. Copy the PowerShell script below to a text editor and update the values in <> to match your deployment (Resource Group name and Container Registry name):
+1. Copy the PowerShell script below to a text editor and update the values in <> to match your deployment (Resource Group name and Container Registry name). Keep the updated script open:
 
     ```azurepowershell
     $RegistryName = "<your Azure Container Registry Name ex: 'containerregbbvqrfwqlrtv6'>"
@@ -51,7 +51,7 @@ This lab can be deployed in any Azure subscription--it has no dependencies on Mi
     
     az acr build --image $imageName --registry $registryName --platform $platform --file $filePath --resource-group $resourceGroup .
     ```
-1. In Cloud Shell, change directories to `labs/orleans-sample-lab/labResources/data/src`
+1. In Cloud Shell, change directories from `scripts` to `labs/orleans-sample-lab/labResources/data/src` by running `cd ../labs/orleans-sample-lab/labResources/data/src`
 1. Use copy/paste to run the updated script contents in your Cloud Shell console from the `src` directory. This will instruct Azure Container Registry to build a new container image with our custom application.
 
 ### Update Container App Image
