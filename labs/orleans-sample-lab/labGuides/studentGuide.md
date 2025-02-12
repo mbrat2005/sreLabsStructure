@@ -52,7 +52,7 @@ This lab can be deployed in any Azure subscription--it has no dependencies on Mi
     az acr build --image $imageName --registry $registryName --platform $platform --file $filePath --resource-group $resourceGroup .
     ```
 1. In Cloud Shell, change directories to `labs/orleans-sample-lab/labResources/data/src`
-1. Run the updated script contents in your Cloud Shell console. This will instruct Azure Container Registry to build a new container image with our custom application.
+1. Use copy/paste to run the updated script contents in your Cloud Shell console from the `src` directory. This will instruct Azure Container Registry to build a new container image with our custom application.
 
 ### Update Container App Image
 
