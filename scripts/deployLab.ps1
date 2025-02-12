@@ -192,7 +192,6 @@ Function Test-LabPrerequisites {
             If ($_.actions -eq '*' -and [string]::IsNullOrEmpty($_.notActions)) {
                 Write-Verbose "Owner-level permissions found on subscription '$($azContext.Subscription.Name)'"
                 $sufficientPermissions = $true
-                continue
             }
             Else {
                 Write-Verbose "Role assignment does not have 'Owner' level permissions on subscription '$($azContext.Subscription.Name)'"
