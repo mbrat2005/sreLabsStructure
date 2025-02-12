@@ -181,18 +181,44 @@ Function Test-LabPrerequisites {
     }
 
     # check that required permissions for lab resources are available
-    # TODO: following only supports subscription level role assignments and explicit role names (for example, 'Owner" role would include any required permissions)
-    # --> Using the get permissions call from the REST API https://learn.microsoft.com/en-us/rest/api/authorization/permissions/list-for-resource-group?view=rest-authorization-2022-04-01&tabs=HTTP could 
-    #     get the assigned permissions, regardless of the role assigned. However, this would require more work from the lab content owner to define the specific permission...
-    $currentUser = Get-AzADUser -SignedIn
-    $existingRoleAssignments = Get-AzRoleAssignment -Scope "/subscriptions/$($azContext.Subscription.Id)" -ObjectId $currentUser.Id
-    ForEach ($requiredRole in $labMetadata.deploymentPermissions ) {
-        If ($existingRoleAssignments.RoleDefinitionName -notcontains $requiredRole.builtInRoleName) {
-            Write-Verbose "Existing role assignments: '$($existingRoleAssignments.RoleDefinitionName -join ', ')' on subscription '$($azContext.Subscription.Name)'"
-            throw "Required role '$($requiredRole.builtInRoleName)' not assigned to user '$($currentUser.Id)' in subscription '$($azContext.Subscription.Name)'. Please assign the required role to the user before running this script"
+    ## check for owner-level permissions on subscription (default)
+    If (!$labMetadata.deploymentPermissions -or $labMetadata.deploymentPermissions.count -eq 0 -or $labMetadata.deploymentPermissions.builtInRoleName -ieq 'owner') {
+        Write-Verbose "No deployment permission specified, or 'Owner' role specified. Checking for owner-level permissions on subscription"
+
+        $sufficientPermissions = $false
+        $uri = 'https://management.azure.com/subscriptions/{0}/providers/Microsoft.Authorization/permissions?api-version=2022-04-01' -f $azContext.Subscription.Id
+        Invoke-AzRestMethod -Method GET -Uri $uri | Select-object -expand Content | ConvertFrom-Json | Select-Object -expand Value | ForEach-Object {
+            Write-Verbose "actions: $($_.actions), notActions: $($_.notActions)"
+            If ($_.actions -eq '*' -and [string]::IsNullOrEmpty($_.notActions)) {
+                Write-Verbose "Owner-level permissions found on subscription '$($azContext.Subscription.Name)'"
+                $sufficientPermissions = $true
+                continue
+            }
+            Else {
+                Write-Verbose "Role assignment does not have 'Owner' level permissions on subscription '$($azContext.Subscription.Name)'"
+            }
         }
-        Else {
-            Write-Verbose "Required role '$($requiredRole.builtInRoleName)' assigned to user '$($currentUser.Id)' in subscription '$($azContext.Subscription.Name)'"
+
+        If (!$?) {
+            Write-Warning "Failed to check for 'Owner' level permissions on the subscription. Deployment will be attempted but may fail due to insufficient permissions"
+        }
+
+        If (!$sufficientPermissions) {
+            throw "Owner-level permissions not found on subscription '$($azContext.Subscription.Name)'. Please assign the 'Owner' role to the user before running this script"
+        }
+    }
+    Else {
+        # check for specified role assignments on subscription by name
+        $currentUser = Get-AzADUser -SignedIn
+        $existingRoleAssignments = Get-AzRoleAssignment -Scope "/subscriptions/$($azContext.Subscription.Id)" -ObjectId $currentUser.Id
+        ForEach ($requiredRole in $labMetadata.deploymentPermissions ) {
+            If ($existingRoleAssignments.RoleDefinitionName -notcontains $requiredRole.builtInRoleName) {
+                Write-Verbose "Existing role assignments: '$($existingRoleAssignments.RoleDefinitionName -join ', ')' on subscription '$($azContext.Subscription.Name)'"
+                throw "Required role '$($requiredRole.builtInRoleName)' not assigned to user '$($currentUser.Id)' in subscription '$($azContext.Subscription.Name)'. Please assign the required role to the user before running this script"
+            }
+            Else {
+                Write-Verbose "Required role '$($requiredRole.builtInRoleName)' assigned to user '$($currentUser.Id)' in subscription '$($azContext.Subscription.Name)'"
+            }
         }
     }
 
