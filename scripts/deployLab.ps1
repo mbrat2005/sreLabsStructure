@@ -206,6 +206,9 @@ Function Test-LabPrerequisites {
         If (!$sufficientPermissions) {
             throw "Owner-level permissions not found on subscription '$($azContext.Subscription.Name)'. Please assign the 'Owner' role to the user before running this script"
         }
+        Else {
+            Write-Verbose "Owner-level permissions confirmed on subscription '$($azContext.Subscription.Name)'"
+        }
     }
     Else {
         # check for specified role assignments on subscription by name
