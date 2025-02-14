@@ -43,11 +43,11 @@ This lab can be deployed in any Azure subscription--it has no dependencies on Mi
 1. Copy the PowerShell script below to a text editor and update the values in <> to match your deployment (Resource Group name and Container Registry name). Keep the updated script open:
 
     ```azurepowershell
-    $RegistryName = "<your Azure Container Registry Name ex: 'containerregbbvqrfwqlrtv6'>"
+    $RegistryName = "yourcontainerregistryname" ## ex: "containerregbbvqrfwqlrtv6"
     $ImageName = "$RegistryName/mycustomimage:v1"
     $Platform = "linux"
     $FilePath = "./web/Dockerfile"
-    $ResourceGroup = "<your resource group name>"
+    $ResourceGroup = "your-Resource-Group-name" ## ex: "rg-my-srelab"
     
     az acr build --image $imageName --registry $registryName --platform $platform --file $filePath --resource-group $resourceGroup .
     ```

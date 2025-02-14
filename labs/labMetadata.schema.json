@@ -236,7 +236,7 @@
     },
     "deploymentPermissions": {
       "type": "array",
-      "description": "Permissions required to deploy the lab if other than contributor at the resource group scope",
+      "description": "Permissions required to deploy the lab if other than owner at the subscription scope.",
       "items": {
         "type": "object",
         "properties": {

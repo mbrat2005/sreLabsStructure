@@ -79,7 +79,14 @@ Function Test-LabPrerequisites {
     }
 
     # convert lab metadata file from JSON to PowerShell object
-    $labMetadata = Get-Content $labMetadataPath | ConvertFrom-Json
+    $labMetadataContent = Get-Content $labMetadataPath -Raw
+    Write-Debug "Lab metadata content: $labMetadataContent"
+    If ($labMetadataContent | Test-Json) {
+        $labMetadata = $labMetadataContent | ConvertFrom-Json
+    }
+    Else {
+        throw "Lab metadata file at '$labMetadataPath' is not valid JSON"
+    }
 
     # set deployment location if none was provided
     If (-not $deploymentLocation) {
@@ -96,8 +103,8 @@ Function Test-LabPrerequisites {
     $script:deploymentLocation = $deploymentLocation
 
     # check that deployment location is in lab metadata
-    If (-not ($labMetadata.validRegions -contains $deploymentLocation)) {
-        throw "Deployment location '$deploymentLocation' not found in lab metadata. Valid locations are $($labMetadata.validRegions -join ', ')"
+    If (-not ($labMetadata.validRegions -contains $deploymentLocation) -or [string]::IsNullOrEmpty($labMetadata.validRegions)) {
+        throw "Location '$deploymentLocation' specified by -deploymentLocation not listed as a valid location in lab metadata. Valid locations are $($labMetadata.validRegions -join ', ')"
     }
 
     # check for lab resources file
@@ -107,12 +114,12 @@ Function Test-LabPrerequisites {
 
     # check for bicep in PATH
     If (-not (Get-Command -CommandType Application -Name bicep -ErrorAction SilentlyContinue)) {
-        throw "Bicep CLI not found in PATH. Please install Bicep CLI"
+        throw "Bicep CLI not found in PATH. Please install Bicep CLI following the instructions at https://learn.microsoft.com/azure/azure-resource-manager/bicep/install#azure-powershell"
     }
 
     # check for Azure PowerShell Module
     If (-not (Get-Module -Name Az.* -ListAvailable)) {
-        throw "Azure PowerShell Module not found. Please install Azure PowerShell Module"
+        throw "Azure PowerShell Module not found. Please install Azure PowerShell Module following the instructions at https://learn.microsoft.com/powershell/azure/install-az-ps#install-the-azure-powershell-module"
     }
 
     # check that Azure is logged in and correct subscription selected
@@ -126,6 +133,7 @@ Function Test-LabPrerequisites {
         If ($response -match 'nN') { exit }
     }
 
+    # check for available quota in the target subscription. Since registering RP, installing modules, and checking quota can be complicated, -skipQuotaCheck bypasses this step for troubleshooting
     If (!$skipQuotaCheck) {
 
         # check that Quota resource provider is registered
@@ -155,6 +163,9 @@ Function Test-LabPrerequisites {
             Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted
             Install-Module Az.Quota -Scope CurrentUser
             Set-PSRepository -Name 'PSGallery' -InstallationPolicy Untrusted
+        }
+        Else {
+            Write-Verbose "Az.Quota module is installed"
         }
 
         # check that quotas are available in required regions
@@ -255,8 +266,6 @@ Function Start-LabDeployment {
         $expirationDate
     )
 
-    $labMetadata = Get-Content $labMetadataPath | ConvertFrom-Json
-
     New-AzSubscriptionDeploymentStack -Name $labInstancePrefix -Location $deploymentLocation -TemplateFile $labResourcesPath -ActionOnUnmanage DeleteAll -DenySettingsMode None -TemplateParameterObject @{
         location          = $deploymentLocation
         labInstancePrefix = $labInstancePrefix
@@ -273,7 +282,7 @@ If (!$labContentPath) {
         $labDirList = Get-ChildItem -Path '../labs' -Directory | Where-Object { $_.Name -notmatch '^_' }
 
         If ($labDirList.Count -eq 0) {
-            Write-Error "No labs found in the '../labs' directory. Please provide the path to the lab content directory" -ErropAction Stop
+            Write-Error "No labs found in the '../labs' directory. Please provide the path to the lab content directory" -ErrorAction Stop
         }
 
         Write-Host "Labs found in the '../labs' directory:"

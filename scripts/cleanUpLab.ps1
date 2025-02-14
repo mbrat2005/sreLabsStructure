@@ -100,4 +100,6 @@ Function Start-LabInstanceCleanup {
     }
 }
 
+Write-Host "SRE Academy Labs are deployed as Deployment Stacks at the subscription level. To clean up a lab's contents, we remove the Deployment Stack. This script finds deployed SRE lab deployment stacks and cleans them up by your selection."
+
 Start-LabInstanceCleanup @PSBoundParameters

@@ -17,12 +17,6 @@
   "labType": "individual",
   "identityType": "lab",
   "deliveryFormat": "instructor-led",
-  "deploymentPermissions": [
-    {
-      "permissionScope": "resourceGroup",
-      "builtInRoleName": "Owner"
-    }
-  ],
   "validRegions": [
     "eastus",
     "westus"
