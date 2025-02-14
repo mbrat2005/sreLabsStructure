@@ -52,15 +52,15 @@ This lab can be deployed in any Azure subscription--it has no dependencies on Mi
 1. Next, we will build our custom container image using the Azure Container Registry, then switch our Container App to use our new image:
 1. Copy the PowerShell script below to a text editor and update the values in <> to match your deployment (Resource Group name and Container Registry name). 
 
-  ```azurepowershell
-$RegistryName = "yourcontainerregistryname" ## ex: "containerregbbvqrfwqlrtv6"
-$ImageName = "$RegistryName/mycustomimage:v1"
-$Platform = "linux"
-$FilePath = "./web/Dockerfile"
-$ResourceGroup = "your-Resource-Group-name" ## ex: "rg-my-srelab"
+    ```azurepowershell
+    $RegistryName = "yourcontainerregistryname" ## ex: "containerregbbvqrfwqlrtv6"
+    $ImageName = "$RegistryName/mycustomimage:v1"
+    $Platform = "linux"
+    $FilePath = "./web/Dockerfile"
+    $ResourceGroup = "your-Resource-Group-name" ## ex: "rg-my-srelab"
 
-az acr build --image $imageName --registry $registryName --platform $platform --file $filePath --resource-group $resourceGroup .
-  ```
+    az acr build --image $imageName --registry $registryName --platform $platform --file $filePath --resource-group $resourceGroup .
+    ```
 
 1. Keep the updated script open:
 ![pasted and updated in notepad](./assets/image-7.png)
