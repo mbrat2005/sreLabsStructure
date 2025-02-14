@@ -25,4 +25,4 @@ See student guide.
 
 Instruct students to use the cleanup script as detailed in the student guide. Alternatively, the Deployment Stack can be deleted by removing it in the Portal.
 
-![Subscription-level Deployment Stacks](subDeploymentStacks.png)
+![Subscription-level Deployment Stacks](./assets/subDeploymentStacks.png)
