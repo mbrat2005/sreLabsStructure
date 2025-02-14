@@ -158,7 +158,7 @@ Function Test-LabPrerequisites {
 
         # check that Az.Quota module is installed
         If (-not (Get-Module -Name Az.Quota -ListAvailable)) {
-            Write-Host -ForegroundColor Yellow "Az.Quota module not found. Please follow the prompts to install Az.Quota from the PowerShell gallery"
+            Write-Host -ForegroundColor Yellow "Az.Quota module not found. Installing..."
 
             Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted
             Install-Module Az.Quota -Scope CurrentUser

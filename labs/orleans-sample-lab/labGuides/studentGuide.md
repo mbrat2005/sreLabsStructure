@@ -13,9 +13,13 @@ Learning objectives:
 This lab can be deployed in any Azure subscription--it has no dependencies on Microsoft identities or specific subscription offers. To deploy the lab, follow these steps:
 
 1. Open the [Azure Cloud Shell](https://shell.azure.com) and select Powershell if prompted (or ensure that you are using PowerShell by checking that the toolbar has the button 'Switch to Bash'). By using Cloud Shell, we ensure that you do not have to set up any tooling locally.
-1. In Cloud Shell, download a copy of this Git repo using `git clone https://github.com/mbrat2005/sreLabsStructure.git`. 
+![Cloud Shell using PowerShell mode](cloudShellInPwshMode.png)
+1. In Cloud Shell, download a copy of this Git repo using `git clone https://github.com/mbrat2005/sreLabsStructure.git`.
+![Cloning Git repo](image.png)
 1. Navigate to the downloaded repo `scripts` directory using the `cd` command.
+![alt text](image-1.png)
 1. From the `scripts` directory, call the `deployLab.ps1` script.
+![alt text](image-2.png)
 1. Follow the prompts to ensure you are logged in to Azure and have met the prerequisites, then proceed with the deployment. _Note: the deployment runs using a subscription-level Deployment Stack for easy clean up.`
 
 ### Alternative ZIP Download Steps
@@ -28,35 +32,45 @@ This lab can be deployed in any Azure subscription--it has no dependencies on Mi
 1. In the Cloud Shell, type `Expand-Archive sreLabsStructure-main.zip`
 1. Change directories to the scripts folder with `cd ./sreLabsStructure-main/sreLabsStructure-main/scripts/`
 1. Run `./deployLab.ps1`. Follow the prompts to ensure you are logged in to Azure and have met the prerequisites, then proceed with the deployment. _Note: the deployment runs using a subscription-level Deployment Stack for easy clean up.`
+![alt text](image-3.png)
 
 ## Lab Steps
 
 ### Verify Lab Deployment and Test Resources
 
 1. Verify the lab has successfully deployed by checking the output of the deployLab.ps1 script from above for errors or looking at Subscriptions > Deployment Stacks in the Azure Portal.
+![Subscription-level Deployment Stacks](subDeploymentStacks.png)
 1. Navigate to the Container App resource and click the URL in the `Application URL` property found in the Portal. This will connect to your Container App and verify that it is accessible and functioning. In the initial deployment, the Container App is running a .NET sample application which will display a 'Welcome to .NET' message and output some version information.
-1. Now that you have called your application, navigate to Log Analytics resource in the Portal and look for your successful call in the logs and metrics.
+![aca url](image-4.png)
+![.net welcome](image-5.png)
+1. Now that you have called your application, navigate to the Log Analytics Workspace resource in the Portal and look for your successful call in the logs and metrics.
+![ala](image-6.png)
 
 ### Build Custom Container Image
 
 1. Next, we will build our custom container image using the Azure Container Registry, then switch our Container App to use our new image:
 1. Copy the PowerShell script below to a text editor and update the values in <> to match your deployment (Resource Group name and Container Registry name). Keep the updated script open:
 
-    ```azurepowershell
-    $RegistryName = "yourcontainerregistryname" ## ex: "containerregbbvqrfwqlrtv6"
-    $ImageName = "$RegistryName/mycustomimage:v1"
-    $Platform = "linux"
-    $FilePath = "./web/Dockerfile"
-    $ResourceGroup = "your-Resource-Group-name" ## ex: "rg-my-srelab"
-    
-    az acr build --image $imageName --registry $registryName --platform $platform --file $filePath --resource-group $resourceGroup .
-    ```
+```azurepowershell
+$RegistryName = "yourcontainerregistryname" ## ex: "containerregbbvqrfwqlrtv6"
+$ImageName = "$RegistryName/mycustomimage:v1"
+$Platform = "linux"
+$FilePath = "./web/Dockerfile"
+$ResourceGroup = "your-Resource-Group-name" ## ex: "rg-my-srelab"
+
+az acr build --image $imageName --registry $registryName --platform $platform --file $filePath --resource-group $resourceGroup .
+```
+
+![pasted and updated in notepad](image-7.png)
 1. In Cloud Shell, change directories from `scripts` to `labs/orleans-sample-lab/labResources/data/src` by running `cd ../labs/orleans-sample-lab/labResources/data/src`
+![change dirs](image-8.png)
 1. Use copy/paste to run the updated script contents in your Cloud Shell console from the `src` directory. This will instruct Azure Container Registry to build a new container image with our custom application.
+![pasted in cloud shell](image-9.png)
 
 ### Update Container App Image
 
-1. After confirming that your build is complete by checking your ACR > Services > Runs list, navigate to your Container App
+1. After confirming that your build is complete by checking your ACR > Services > Tasks > Runs list, navigate to your Container App
+![ACR Runs List](image-10.png)
 1. Click Application > Containers > Edit and Deploy.
 1. Select the existing container and delete it.
 1. Click Add > App Container
@@ -68,4 +82,6 @@ This lab can be deployed in any Azure subscription--it has no dependencies on Mi
 ## Lab Cleanup
 
 1. In Cloud Shell, navigate to the directory `scripts` at the root of the lab folder
+![clean up scripts](image-11.png)
 1. Run cleanUpLab.ps1
+![run clean up](image-12.png)
