@@ -50,7 +50,7 @@ This lab can be deployed in any Azure subscription--it has no dependencies on Mi
 ### Build Custom Container Image
 
 1. Next, we will build our custom container image using the Azure Container Registry, then switch our Container App to use our new image:
-1. Copy the PowerShell script below to a text editor and update the values in <> to match your deployment (Resource Group name and Container Registry name). 
+1. Copy the PowerShell script below to a text editor and update the `$RegistryName` and `$ResourceGroup` match your deployment (Resource Group name and Container Registry name). 
 
     ```azurepowershell
     $RegistryName = "yourcontainerregistryname" ## ex: "containerregbbvqrfwqlrtv6"
