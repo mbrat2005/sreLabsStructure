@@ -137,13 +137,13 @@ Function Test-LabPrerequisites {
     If (!$skipQuotaCheck) {
 
         # check that Quota resource provider is registered
-        if ((Get-AzResourceProvider -ProviderNamespace Microsoft.Quota | Where-Object { $_.ResourceTypes.ResourceTypeName -eq 'quotas' } ).RegistrationState -ne 'Registered') {
+        if ((Get-AzResourceProvider -ProviderNamespace Microsoft.Quota -Location $deploymentLocation | Where-Object { $_.ResourceTypes.ResourceTypeName -eq 'quotas' } ).RegistrationState -ne 'Registered') {
             Write-Host "Microsoft.Quota resource provider not registered. We will register it now."
 
             Register-AzResourceProvider -ProviderNamespace Microsoft.Quota
 
             $stopWatch = [System.Diagnostics.Stopwatch]::StartNew()
-            While ((Get-AzResourceProvider -ProviderNamespace Microsoft.Quota | Where-Object { $_.ResourceTypes.ResourceTypeName -eq 'quotas' } ).RegistrationState -ne 'Registered' -and $stopWatch.Elapsed.TotalMinutes -lt 15) {
+            While ((Get-AzResourceProvider -ProviderNamespace Microsoft.Quota -Location $deploymentLocation | Where-Object { $_.ResourceTypes.ResourceTypeName -eq 'quotas' } ).RegistrationState -ne 'Registered' -and $stopWatch.Elapsed.TotalMinutes -lt 15) {
                 Write-Host "Waiting for Microsoft.Quota resource provider to register..."
                 Start-Sleep -Seconds 5
             }
