@@ -90,7 +90,13 @@ Function Start-LabInstanceCleanup {
     # remove all deployment stacks related to the lab
     Write-Host "Removing deployment stack '$($deploymentStack.Name)'..."
 
-    Remove-AzSubscriptionDeploymentStack -Name $deploymentStack.Name -Force -ActionOnUnmanage DeleteAll -WhatIf:$whatIf
+    try {
+        Remove-AzSubscriptionDeploymentStack -Name $deploymentStack.Name -Force -ActionOnUnmanage DeleteAll -WhatIf:$whatIf -ErrorAction Stop
+    }
+    catch {
+        Write-Host "Failed to remove deployment stack '$($deploymentStack.Name)'. See error for details $_"
+        exit
+    }
 
     If ($?) {
         Write-Host "Deployment stack '$($deploymentStack.Name)' removed"
