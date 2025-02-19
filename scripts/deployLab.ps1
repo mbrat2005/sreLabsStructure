@@ -140,7 +140,12 @@ Function Test-LabPrerequisites {
         if ((Get-AzResourceProvider -ProviderNamespace Microsoft.Quota -Location $deploymentLocation | Where-Object { $_.ResourceTypes.ResourceTypeName -eq 'quotas' } ).RegistrationState -ne 'Registered') {
             Write-Host "Microsoft.Quota resource provider not registered. We will register it now."
 
-            Register-AzResourceProvider -ProviderNamespace Microsoft.Quota
+            try {
+                Register-AzResourceProvider -ProviderNamespace Microsoft.Quota -ErrorAction Stop
+            }
+            catch {
+                throw "An error occurred when attempting to register the Microsoft.Quota resource provider, which is required to verify available quota in the target subscription. To try again bypassing this step, use the -skipQuotaCheck flag. Error: $_"
+            }
 
             $stopWatch = [System.Diagnostics.Stopwatch]::StartNew()
             While ((Get-AzResourceProvider -ProviderNamespace Microsoft.Quota -Location $deploymentLocation | Where-Object { $_.ResourceTypes.ResourceTypeName -eq 'quotas' } ).RegistrationState -ne 'Registered' -and $stopWatch.Elapsed.TotalMinutes -lt 15) {
@@ -214,7 +219,7 @@ Function Test-LabPrerequisites {
         }
 
         If (!$sufficientPermissions) {
-            throw "Owner-level permissions not found on subscription '$($azContext.Subscription.Name)'. Please assign the 'Owner' role to the user before running this script"
+            throw "Owner-level permissions not found on subscription '$($azContext.Subscription.Name)' for the current user. Please assign the 'Owner' role to the user before running this script"
         }
         Else {
             Write-Verbose "Owner-level permissions confirmed on subscription '$($azContext.Subscription.Name)'"
